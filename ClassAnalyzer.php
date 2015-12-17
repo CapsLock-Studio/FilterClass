@@ -19,7 +19,7 @@ class ClassAnalyzer
      */
     public function __construct(array $config = [])
     {
-        $this->fn       = fopen("result1", "wb");
+        $this->fn       = fopen("result-".date("YmdHis"), "wb");
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
 
