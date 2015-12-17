@@ -150,7 +150,7 @@ class ClassAnalyzer
         foreach ($matchClassPath as $key => $matchClass) {
             foreach ($matchClass as $matched) {
                 $regex = "/".quotemeta("{$matched["namespace"]}\\{$matched["class"]}")."(;|,|\()/";
-                if (strlen($matched["namespace"]) > 1 && strlen($matched["class"]) > 1 && preg_match($regex, $fileContent)) {
+                if (strlen($matched["namespace"]) > 0 && strlen($matched["class"]) > 0 && preg_match($regex, $fileContent)) {
                     if ($this->getShowLinesFlag()) {
                         $lines = preg_grep($regex, explode("\n", $fileContent));
                         $lines = array_keys($lines);
