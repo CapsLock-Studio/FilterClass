@@ -1,5 +1,7 @@
 <?php
 
+include "ClassAnalyzer.php";
+
 $f = new ClassAnalyzer(
     [
         'fromPath' => '/Users/michael/Documents/hiiir/mall-dev/vendor',

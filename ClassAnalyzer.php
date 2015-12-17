@@ -126,13 +126,7 @@ class ClassAnalyzer
 
         foreach ($files as $filePath) {
             $fileContent = file_get_contents($filePath);
-            if ($this->getShowLinesFlag()) {
-                foreach (explode("\n", $fileContent) as $line => $content) {
-                    $this->analyzeContent($content, $matchClassPath, $resource, $filePath, ($line + 1));
-                }
-            } else {
-                $this->analyzeContent($fileContent, $matchClassPath, $resource, $filePath);
-            }
+            $this->analyzeContent($fileContent, $matchClassPath, $resource, $filePath);
         }
 
         foreach ($dirs as $dirValue) {
@@ -149,24 +143,45 @@ class ClassAnalyzer
      * @param  integer $line           目前在的行數
      * @return void
      */
-    private function analyzeContent($fileContent, $matchClassPath, &$resource, $filePath, $line = 0)
+    private function analyzeContent($fileContent, $matchClassPath, &$resource, $filePath)
     {
         $fn = $this->getResultResource();
 
         foreach ($matchClassPath as $key => $matchClass) {
             foreach ($matchClass as $matched) {
-                if (strlen($matched["namespace"]) > 1 && strlen($matched["class"]) > 1 && preg_match("/".quotemeta("{$matched["namespace"]}\\{$matched["class"]}")."/", $fileContent)) {
-                    if (!in_array(["in" => $filePath, "from" => $key], $resource)) {
+                $regex = "/".quotemeta("{$matched["namespace"]}\\{$matched["class"]}")."(;|,|\()/";
+                if (strlen($matched["namespace"]) > 1 && strlen($matched["class"]) > 1 && preg_match($regex, $fileContent)) {
+                    if ($this->getShowLinesFlag()) {
+                        $lines = preg_grep($regex, explode("\n", $fileContent));
+                        $lines = array_keys($lines);
+                        $lines = array_map(function ($line) {return $line + 1;}, $lines);
+                        $lines = array_reverse($lines);
+                        $line  = array_pop($lines);
+                    }
+
+                    do {
                         $key      = str_replace($this->getBasePath(), "", $key);
                         $filePath = str_replace($this->getBasePath(), "", $filePath);
-                        $content  = "find pattern:{$matched["namespace"]}\\{$matched["class"]}\n";
-                        $content .= "find match class: {$matched["class"]}\n";
-                        $content .= "in path: {$filePath}\n";
-                        $content .= "from path: {$key}\n";
-                        $content .= "find namespace: {$matched["namespace"]}\n";
-                        $content .= empty($line) ? "\n\n" : "in lines: {$line}\n\n";
-                        fwrite($fn, $content);
-                    }
+                        $pattern  = "{$matched["namespace"]}\\{$matched["class"]}";
+                        $keymap   = [
+                            "in" => $filePath,
+                            "from" => $key,
+                            "line" => $line,
+                            "pattern" => $pattern
+                        ];
+                        if (!in_array($keymap, $resource)) {
+                            $content  = "find pattern: {$pattern}\n";
+                            $content .= "find match class: {$matched["class"]}\n";
+                            $content .= "in path: {$filePath}\n";
+                            $content .= "from path: {$key}\n";
+                            $content .= "find namespace: {$matched["namespace"]}\n";
+                            $content .= empty($line) ? "\n\n" : "in lines: {$line}\n\n";
+                            $resource[] = $keymap;
+                            fwrite($fn, $content);
+
+                            $line = isset($lines) ? array_pop($lines) : 0;
+                        }
+                    } while (!empty($line));
                 }
             }
         }
