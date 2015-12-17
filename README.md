@@ -6,7 +6,7 @@ Author: michael_kuan@hiiir.com
 這是一個幫忙分析兩邊的資料夾用引用到的class，方便分析瞭解更動code之後QA需要重新測試什麼項目。
 
 
-以下稱作引入的資料夾為folderA
+以下稱作引入的資料夾為folderA  
 分析引入folderA的class所在資料夾為folderB
 
 
