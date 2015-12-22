@@ -116,22 +116,16 @@ class ClassAnalyzer
      * @param  array  $resource       folderB的class資料
      * @return void
      */
-    private function analyzeContainClass($dir, $matchClassPath, &$resource = [])
+    private function analyzeContainClass($dir, $matchClassPath, array &$resource = [])
     {
-        $fn = $this->getResultResource();
+        $files = glob("{$dir}/*");
 
-
-        $files = glob("{$dir}/*.php");
-        $dirs = glob("{$dir}/*", GLOB_ONLYDIR);
-
-        foreach ($files as $filePath) {
+        $this->iterDir($files, function ($filePath) use ($matchClassPath, &$resource) {
             $fileContent = file_get_contents($filePath);
             $this->analyzeContent($fileContent, $matchClassPath, $resource, $filePath);
-        }
-
-        foreach ($dirs as $dirValue) {
-            $this->analyzeContainClass($dirValue, $matchClassPath, $resource);
-        }
+        }, function ($filePath) use ($matchClassPath, &$resource) {
+            $this->analyzeContainClass($filePath, $matchClassPath, $resource);
+        });
     }
 
     /**
@@ -143,7 +137,7 @@ class ClassAnalyzer
      * @param  integer $line           目前在的行數
      * @return void
      */
-    private function analyzeContent($fileContent, $matchClassPath, &$resource, $filePath)
+    private function analyzeContent($fileContent, array $matchClassPath, array &$resource, $filePath)
     {
         $fn = $this->getResultResource();
 
@@ -164,9 +158,9 @@ class ClassAnalyzer
                         $filePath = str_replace($this->getBasePath(), "", $filePath);
                         $pattern  = "{$matched["namespace"]}\\{$matched["class"]}";
                         $keymap   = [
-                            "in" => $filePath,
-                            "from" => $key,
-                            "line" => $line,
+                            "in"      => $filePath,
+                            "from"    => $key,
+                            "line"    => $line,
                             "pattern" => $pattern
                         ];
                         if (!in_array($keymap, $resource)) {
@@ -193,25 +187,42 @@ class ClassAnalyzer
      * @param  string $result 分析完畢的資料
      * @return void
      */
-    private function getClassAndPath($dir, &$result = [])
+    private function getClassAndPath($dir, array &$result = [])
     {
-        $files = glob("{$dir}/*.php");
-        $dirs  = glob("{$dir}/*", GLOB_ONLYDIR);
+        $files = glob("{$dir}/*");
 
-        foreach ($files as $filePath) {
+        $this->iterDir($files, function ($filePath) use (&$result) {
             $fileContent = file_get_contents($filePath);
             if (preg_match("/class ([A-Za-z0-9_]+)/", $fileContent, $match) && isset($match[1])) {
                 $result[$filePath] = is_array($result[$filePath]) ? [] : $result[$filePath];
-                preg_match("/namespace (.*);/", $fileContent, $mnamespace);
+                preg_match("/namespace (.*);/", $fileContent, $namespace);
                 $result[$filePath][] = [
                     "class"     => $match[1],
-                    "namespace" => isset($mnamespace[1]) ? $mnamespace[1] : "",
+                    "namespace" => isset($namespace[1]) ? $namespace[1] : "",
                 ];
             }
-        }
+        }, function ($filePath) use (&$result) {
+            $this->getClassAndPath($filePath, $result);
+        });
+    }
 
-        foreach ($dirs as $dirValue) {
-            $this->getClassAndPath($dirValue, $result, $matchClass);
+    /**
+     * 掃資料夾用
+     * @param  array $files 檔案
+     * @param  callable $cb1   如果是php
+     * @param  callable $cb2   如果是資料夾
+     * @return void
+     */
+    private function iterDir(array $files, callable $cb1, callable $cb2)
+    {
+        foreach ($files as $filePath) {
+            $extension = explode(".", $filePath);
+            $extension = end($extension);
+            if ($extension === "php" && is_file($filePath)) {
+                $cb1($filePath);
+            } elseif (is_dir($filePath)) {
+                $cb2($filePath);
+            }
         }
     }
 }
