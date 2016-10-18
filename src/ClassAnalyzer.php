@@ -9,7 +9,7 @@ use FilterClass\Visitor\MethodVisitor;
 use FilterClass\Visitor\FilterClassException;
 
 /**
- * @author michael_kuan <michael_kuan@hiiir.com>
+ * @author michael_kuan <michael34435@capslock.tw>
  *
  * 一個簡單的分析器，可以分析folderA有在folderB用到什麼class(含namespace)
  */
