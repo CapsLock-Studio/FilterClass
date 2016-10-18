@@ -10,10 +10,13 @@ Author: michael34435@capslock.tw
 分析引入folderA的class所在資料夾為folderB
 
 ## 安裝
-    composer install 
+    composer install
 
 ## 使用方式
     ./bin/analyze -f {folderA} -t {folderB} [-t {folderB-2}] [--dead-code]
+
+## 建立使用捷徑
+    ./install.sh
 
 ## 參數說明
     -f          參照資料夾

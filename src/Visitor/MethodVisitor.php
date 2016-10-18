@@ -40,7 +40,6 @@ class MethodVisitor extends NodeVisitorAbstract
             }
         }
 
-
         if (!$node instanceof Node\Scalar\EncapsedStringPart) {
             $printer = new PrettyPrinter\Standard;
             $code    = $printer->prettyPrint([$node]);
