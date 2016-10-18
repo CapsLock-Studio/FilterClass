@@ -9,9 +9,8 @@ Author: michael34435@capslock.tw
 以下稱作引入的資料夾為folderA  
 分析引入folderA的class所在資料夾為folderB
 
-
-## 限制
-受分析的folderA class必須要有namespace供folderB使用，不然無法使用(這樣會方便識別為一個package)。
+## 安裝
+composer install 
 
 ## 開關
 目前提供了一個「顯示所在行數」的開關可以使用，關閉的話同樣的class資料不會再度在結果顯示，它會只顯示一次。
