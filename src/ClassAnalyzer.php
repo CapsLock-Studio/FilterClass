@@ -154,9 +154,7 @@ class ClassAnalyzer
      */
     private function analyzeContainClass($dir, $matchClassPath, array &$resource = [])
     {
-        $files = glob("{$dir}/*");
-
-        $this->iterDir($files, function ($filePath) use ($matchClassPath, &$resource) {
+        $this->iterDir("{$dir}/*", function ($filePath) use ($matchClassPath, &$resource) {
             $fileContent = php_strip_whitespace($filePath);
             $this->analyzeContent($fileContent, $matchClassPath, $resource, $filePath);
         }, function ($filePath) use ($matchClassPath, &$resource) {
@@ -201,10 +199,11 @@ class ClassAnalyzer
                         $content .= "from path: {$fromPath}\n";
                         $content .= "find namespace: {$matched["namespace"]}\n";
                         $content .= "find method: " . json_encode($methods) . "\n\n";
-                        $unused   = array_diff($matched["functions"], $methods);
-
-                        $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
-                        $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
+                        if ($methods) {
+                            $unused = array_diff($matched["functions"], $methods);
+                            $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
+                            $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
+                        }
 
                         $resource[] = $keymap;
                         fwrite($fn, $content);
@@ -222,9 +221,7 @@ class ClassAnalyzer
      */
     private function getClassAndPath($dir, array &$filemap = [])
     {
-        $files = glob("{$dir}/*");
-
-        $this->iterDir($files, function ($filePath) use (&$filemap) {
+        $this->iterDir("{$dir}/*", function ($filePath) use (&$filemap) {
             $tempClassAndNamespace = $this->getClassAndNamespaceFromFilePath($filePath);
             if ($tempClassAndNamespace) {
                 $filemap[$filePath]   = isset($filemap[$filePath]) ? $filemap[$filePath] : [];
@@ -260,13 +257,14 @@ class ClassAnalyzer
 
     /**
      * 掃資料夾用
-     * @param  array $files 檔案
+     * @param  string   $glob 檔案
      * @param  callable $cb1   如果是php
      * @param  callable $cb2   如果是資料夾
      * @return void
      */
-    private function iterDir(array $files, callable $cb1, callable $cb2)
+    private function iterDir($glob, callable $cb1, callable $cb2)
     {
+        $files = glob($glob);
         foreach ($files as $filePath) {
             $filePath  = realpath($filePath);
             $extension = explode(".", $filePath);
