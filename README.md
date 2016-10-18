@@ -13,7 +13,7 @@ Author: michael34435@capslock.tw
     composer install 
 
 ## 使用方式
-    ./bin/analyze -f {folderA} -t {folderB} [-t {folderB-2}] [--dead-code]
+    ./bin/analyze -t {folderB} [-t {folderB-2}] [-f {folderA}] [--dead-code]
 
 ## 參數說明
     -f          參照資料夾
