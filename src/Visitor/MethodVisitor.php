@@ -75,8 +75,6 @@ class MethodVisitor extends NodeVisitorAbstract
             $useThis   = true;
         }
 
-
-
         if ($codeClass === "parent") {
             $codeClass = $this->parent;
         }
