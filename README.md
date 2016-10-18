@@ -12,9 +12,6 @@ Author: michael34435@capslock.tw
 ## 安裝
     composer install 
 
-## 開關
-目前提供了一個「顯示所在行數」的開關可以使用，關閉的話同樣的class資料不會再度在結果顯示，它會只顯示一次。
-
 ## 使用方式
     ./bin/analyze -f {folderA} -t {folderB} [-t {folderB-2}] [--dead-code]
 
