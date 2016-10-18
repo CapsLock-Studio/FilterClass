@@ -1,0 +1,69 @@
+#!/usr/bin/php
+<?php
+
+$default           = ["f" => "", "t" => "", "dead-code" => false];
+$opts              = getopt("f:t:", ["dead-code"]);
+$opts["dead-code"] = isset($opts["dead-code"]) ? true : false;
+$opts              = array_merge($default, $opts);
+
+$fromFolder = $opts["f"];
+$toFolder   = $opts["t"];
+$deadCode   = $opts["dead-code"];
+if (!($fromFolder || $toFolder)) {
+    echo "You must assign -f and -t flag.", PHP_EOL;
+    exit(1);
+}
+
+$toFolder = is_string($toFolder) ? [$toFolder] : $toFolder;
+
+if (!file_exists($fromFolder)) {
+    $fromFolder = getcwd();
+}
+
+foreach ($toFolder as $key => $folder) {
+    if (!file_exists($folder)) {
+        echo "The path you are going to compare must be existed", PHP_EOL;
+        exit(1);
+    }
+}
+
+require __DIR__ . "/../vendor/autoload.php";
+
+$unused = [];
+
+foreach ($toFolder as $folder) {
+    $filter = new FilterClass\ClassAnalyzer([
+        "fromPath" => $fromFolder,
+        "toPath"   => $folder,
+    ]);
+
+    $filter->analyze();
+
+    if ($deadCode) {
+        $unused[] = $filter->getUnusedCode();
+        $filter->setShowOutputAfterCreatedFlag(false);
+    } else {
+        $filter->setShowOutputAfterCreatedFlag(true);
+    }
+}
+
+if ($unused) {
+    $processed = [];
+    foreach ($unused as $code) {
+        foreach ($code as $class => $method) {
+            $processed[$class] = isset($processed[$class]) ? $processed[$class] : $method;
+            $processed[$class] = array_intersect($processed[$class], $method);
+        }
+    }
+
+    foreach ($processed as $class => $methods) {
+        if ($methods) {
+            echo "{$class}:", PHP_EOL;
+            foreach ($methods as $method) {
+                echo "\t{$method}", PHP_EOL;
+            }
+
+            echo PHP_EOL;
+        }
+    }
+}

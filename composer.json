@@ -1,0 +1,13 @@
+{
+    "name": "michael_kuan/test-filter-class",
+    "type": "library",
+    "description": "A function & class parser",
+    "require": {
+        "nikic/php-parser": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "FilterClass\\": "src"
+        }
+    }
+}
