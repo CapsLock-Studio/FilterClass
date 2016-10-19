@@ -1,10 +1,8 @@
 FilterClass
 --
 
-![](https://travis-ci.org/CapsLock-Studio/FilterClass.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/CapsLock-Studio/FilterClass/badge.svg?branch=master)](https://coveralls.io/github/CapsLock-Studio/FilterClass?branch=master)
-![](https://img.shields.io/github/forks/CapsLock-Studio/FilterClass.svg)
-![](https://img.shields.io/github/stars/CapsLock-Studio/FilterClass.svg)
+![](https://travis-ci.org/CapsLock-Studio/FilterClass.svg)
+![](http://php7ready.timesplinter.ch/Codeception/Codeception/badge.svg)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 
 
