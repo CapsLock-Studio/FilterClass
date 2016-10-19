@@ -1,7 +1,7 @@
 FilterClass
 --
 
-![https://travis-ci.org/CapsLock-Studio/FilterClass.svg?branch=master]()
+![](https://travis-ci.org/CapsLock-Studio/FilterClass.svg?branch=master)
 
 Author: michael34435@capslock.tw
 
