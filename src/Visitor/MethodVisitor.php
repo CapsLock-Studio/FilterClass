@@ -92,7 +92,7 @@ class MethodVisitor extends NodeVisitorAbstract
 
     private function assign($codeClass, $codeName)
     {
-        if ($codeClass) {
+        if (is_string($codeClass) && is_string($codeName)) {
             $this->code[$codeClass]   = isset($this->code[$codeClass]) ? $this->code[$codeClass] : [];
             $this->code[$codeClass][] = $codeName;
             $this->code[$codeClass]   = array_unique($this->code[$codeClass]);

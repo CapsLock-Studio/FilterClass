@@ -250,7 +250,7 @@ class ClassAnalyzer
      */
     private function getClassAndNamespaceFromFilePath($path)
     {
-        $fileContent = file_get_contents($path);
+        $fileContent = php_strip_whitespace($path);
         if (preg_match(self::REGEX["class"], $fileContent, $match)) {
             preg_match(self::REGEX["namespace"], $fileContent, $namespace);
             preg_match_all(self::REGEX["function"], $fileContent, $functions);
