@@ -1,5 +1,5 @@
 {
-    "name": "CapsLock-Studio/FilterClass",
+    "name": "capslock-studio/filter-class",
     "type": "library",
     "description": "A function & class parser",
     "require": {
