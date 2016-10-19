@@ -1,6 +1,8 @@
 FilterClass
 --
 
+![https://travis-ci.org/CapsLock-Studio/FilterClass.svg?branch=master]()
+
 Author: michael34435@capslock.tw
 
 這是一個幫忙分析兩邊的資料夾用引用到的class，方便分析瞭解更動code之後QA需要重新測試什麼項目。
