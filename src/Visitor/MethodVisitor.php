@@ -54,7 +54,9 @@ class MethodVisitor extends NodeVisitorAbstract
             $codeClass = $node->class;
             if ($codeClass instanceof Node\Name) {
                 $codeClass = array_pop($codeClass->parts);
-            } elseif ($codeClass instanceof Node\Expr\Variable) {
+            }
+
+            if ($codeClass instanceof Node\Expr\Variable) {
                 $codeClass = $codeClass->name;
                 $codeClass = isset($this->objectMap[$codeClass]) ? $this->objectMap[$codeClass] : $codeClass;
             }
@@ -64,8 +66,6 @@ class MethodVisitor extends NodeVisitorAbstract
             $codeClass = $node->var;
             if (isset($codeClass->name)) {
                 $codeClass = isset($this->objectMap[$codeClass->name]) ? $this->objectMap[$codeClass->name] : $codeClass->name;
-            } else {
-                $codeClass = "";
             }
         }
 

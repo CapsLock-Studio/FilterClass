@@ -6,7 +6,6 @@ use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use FilterClass\Visitor\ClassVisitor;
 use FilterClass\Visitor\MethodVisitor;
-use FilterClass\Exception\FilterClassException;
 
 /**
  * @author michael34435 <michael34435@capslock.tw>
@@ -29,7 +28,6 @@ class ClassAnalyzer
     private $basePath = "";
     private $show     = false;
     private $report   = "";
-    private $buffer   = [];
     private $unused   = [];
     private $used     = [];
 
@@ -46,7 +44,15 @@ class ClassAnalyzer
         $this->toPath   = $config["toPath"];
 
         if (!($this->getFromPath() || $this->getToPath())) {
-            throw new FilterClassException("No path found in config.", 1);
+            throw new Exception("You have to specified `fromPath` and `toPath` in config array.", 1);
+        }
+
+        if (!is_dir($this->getFromPath())) {
+            throw new Exception("Defined `fromPath` is not valid");
+        }
+
+        if (!is_dir($this->getToPath())) {
+            throw new Exception("Defined `toPath` is not valid");
         }
     }
 
@@ -285,36 +291,26 @@ class ClassAnalyzer
     {
         $code = [];
 
-        // 判斷是不是可以從buffer取得
-        if (isset($this->buffer[$path])) {
-            $code = $this->buffer[$path];
-        } else {
-            // parser created
-            $traverser = new NodeTraverser();
-            $parser    = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
+        // parser created
+        $traverser = new NodeTraverser();
+        $parser    = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
+        $content   = php_strip_whitespace($path);
+        if (preg_match(self::REGEX["extends"], $content, $match)) {
+            $classname = $match[1];
+            $parent    = isset($match[3]) ? $match[3] : "";
 
-            $content = php_strip_whitespace($path);
+            // visitor class method
+            $classVisitor = new ClassVisitor();
+            $classVisitor->setClassName($classname);
+            $classVisitor->setParent($parent);
+            $traverser->addVisitor($classVisitor);
 
-            if (preg_match(self::REGEX["extends"], $content, $match)) {
-                $classname = $match[1];
-                $parent    = isset($match[3]) ? $match[3] : "";
+            // parse it
+            $stmts = $parser->parse($content);
+            $traverser->traverse($stmts);
 
-                // visitor class method
-                $classVisitor = new ClassVisitor();
-                $classVisitor->setClassName($classname);
-                $classVisitor->setParent($parent);
-                $traverser->addVisitor($classVisitor);
-
-                // parse it
-                $stmts = $parser->parse($content);
-                $traverser->traverse($stmts);
-
-                // 取得所有「使用到」的class method
-                $code = $classVisitor->getCode();
-
-                // 加入已經處理的buffer
-                $this->buffer[$path] = $code;
-            }
+            // 取得所有「使用到」的class method
+            $code = $classVisitor->getCode();
         }
 
         return $code;
