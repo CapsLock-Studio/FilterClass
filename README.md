@@ -14,7 +14,10 @@ Author: michael34435@capslock.tw
 以下稱作引入的資料夾為folderA  
 分析引入folderA的class所在資料夾為folderB
 
-## 安裝
+## Composer安裝
+    composer require "capslock-studio/filter-class"
+
+## 安裝相依
     composer install
 
 ## 使用方式
