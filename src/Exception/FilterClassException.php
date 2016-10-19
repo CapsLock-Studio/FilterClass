@@ -1,6 +1,6 @@
 <?php
 
-namespace FilterClass;
+namespace FilterClass\Exception;
 
 use Exception;
 
