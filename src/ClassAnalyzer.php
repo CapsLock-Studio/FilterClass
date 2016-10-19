@@ -31,6 +31,7 @@ class ClassAnalyzer
     private $report   = "";
     private $buffer   = [];
     private $unused   = [];
+    private $used     = [];
 
     /**
      * 建構子
@@ -192,6 +193,9 @@ class ClassAnalyzer
                     ];
 
                     if (!in_array($keymap, $resource)) {
+                        $this->used = array_merge_recursive($code, $this->used);
+
+                        $used     = isset($this->used[$matched["class"]]) ? $this->used[$matched["class"]] : [];
                         $methods  = isset($code[$matched["class"]]) ? $code[$matched["class"]] : [];
                         $content  = "find pattern: {$pattern}\n";
                         $content .= "find match class: {$matched["class"]}\n";
@@ -199,11 +203,9 @@ class ClassAnalyzer
                         $content .= "from path: {$fromPath}\n";
                         $content .= "find namespace: {$matched["namespace"]}\n";
                         $content .= "find method: " . json_encode($methods) . "\n\n";
-                        if ($methods) {
-                            $unused = array_diff($matched["functions"], $methods);
-                            $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
-                            $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
-                        }
+                        $unused   = array_diff($matched["functions"], $used);
+                        $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
+                        $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
 
                         $resource[] = $keymap;
                         fwrite($fn, $content);
