@@ -39,8 +39,9 @@ class ClassAnalyzer
      */
     public function __construct(array $config = [])
     {
-        $this->report   = md5(microtime());
-        $this->fn       = fopen($this->report, "wb");
+        $templateConfig = ["fromPath" => "", "toPath" => ""];
+        $config         = array_merge($templateConfig, $config);
+        $this->fn       = fopen("php://memory", "wb");
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
 
@@ -63,12 +64,13 @@ class ClassAnalyzer
      */
     public function __destruct()
     {
-        fclose($this->getResultResource());
+        $fn = $this->getResultResource();
         if ($this->getShowOutputAfterCreatedFlag()) {
-            echo file_get_contents($this->report);
+            rewind($fn);
+            echo stream_get_contents($fn);
         }
 
-        @unlink($this->report);
+        fclose($fn);
     }
 
     /**
@@ -208,7 +210,7 @@ class ClassAnalyzer
                         $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
 
                         $resource[] = $keymap;
-                        fwrite($fn, $content);
+                        fputs($fn, $content);
                     }
                 }
             }
