@@ -6,7 +6,7 @@ use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use FilterClass\Visitor\ClassVisitor;
 use FilterClass\Visitor\MethodVisitor;
-use FilterClass\Visitor\FilterClassException;
+use FilterClass\Exception\FilterClassException;
 
 /**
  * @author michael_kuan <michael34435@capslock.tw>
