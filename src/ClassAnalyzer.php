@@ -43,15 +43,11 @@ class ClassAnalyzer
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
 
-        if (!($this->getFromPath() || $this->getToPath())) {
-            throw new Exception("You have to specified `fromPath` and `toPath` in config array.", 1);
-        }
-
         if (!is_dir($this->getFromPath())) {
             throw new Exception("Defined `fromPath` is not valid");
         }
 
-        if (!is_dir($this->getToPath())) {
+        if ($this->getToPath() && !is_dir($this->getToPath())) {
             throw new Exception("Defined `toPath` is not valid");
         }
     }
@@ -88,7 +84,11 @@ class ClassAnalyzer
         $collectedClass = [];
         $this->getClassAndPath($this->getFromPath(), $collectedClass);
         $this->analyzeContainClass($this->getFromPath(), $collectedClass);
-        $this->analyzeContainClass($this->getToPath(), $collectedClass);
+
+        if ($this->getToPath()) {
+            $this->analyzeContainClass($this->getToPath(), $collectedClass);
+        }
+
         foreach ($this->unused as $class => $method) {
             if (isset($this->used[$class])) {
                 $this->unused[$class] = array_diff($this->unused[$class], $this->used[$class]);
@@ -261,12 +261,8 @@ class ClassAnalyzer
         $fileStr     = file_get_contents($path);
         $fileContent = "";
 
-        $commentTokens = [T_COMMENT];
-
-        if (defined('T_DOC_COMMENT'))
-            $commentTokens[] = T_DOC_COMMENT; // PHP 5
-        if (defined('T_ML_COMMENT'))
-            $commentTokens[] = T_ML_COMMENT;  // PHP 4
+        $commentTokens   = [T_COMMENT];
+        $commentTokens[] = defined('T_DOC_COMMENT') ? T_DOC_COMMENT : T_ML_COMMENT;
 
         $tokens = token_get_all($fileStr);
 
