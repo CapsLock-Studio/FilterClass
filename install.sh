@@ -1,4 +1,4 @@
-if [ -z ${TRAVIS} ]; then
+if [ ! -z $TRAVIS ]; then
     exit
 fi
 
