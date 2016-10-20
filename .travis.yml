@@ -10,7 +10,7 @@ before_script:
     - composer install
 
 script:
-    - vendor/bin/codecept run unit --coverage-clover=clover.xml
+    - vendor/bin/codecept run unit --coverage-xml clover.xml
 
 after_success:
-    - travis_retry php vendor/bin/coveralls -x clover.xml
+    - travis_retry php vendor/bin/coveralls -x tests/_output/clover.xml
