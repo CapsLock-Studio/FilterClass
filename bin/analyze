@@ -9,22 +9,11 @@ $opts              = array_merge($default, $opts);
 $fromFolder = $opts["f"];
 $toFolder   = $opts["t"];
 $deadCode   = $opts["dead-code"];
-if (!($fromFolder || $toFolder)) {
-    echo "You must assign -f and -t flag.", PHP_EOL;
-    exit(1);
-}
 
 $toFolder = is_string($toFolder) ? [$toFolder] : $toFolder;
 
 if (!file_exists($fromFolder)) {
     $fromFolder = getcwd();
-}
-
-foreach ($toFolder as $key => $folder) {
-    if (!file_exists($folder)) {
-        echo "The path you are going to compare must be existed", PHP_EOL;
-        exit(1);
-    }
 }
 
 require __DIR__ . "/../vendor/autoload.php";
