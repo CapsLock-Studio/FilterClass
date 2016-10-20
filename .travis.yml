@@ -13,4 +13,4 @@ script:
     - vendor/bin/codecept run unit --coverage-xml clover.xml
 
 after_success:
-    - travis_retry php vendor/bin/coveralls -x tests/_output/clover.xml
+    - php vendor/bin/coveralls -x tests/_output/clover.xml
