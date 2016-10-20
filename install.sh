@@ -1,3 +1,7 @@
+if [ -z ${TRAVIS} ]; then
+    exit
+fi
+
 symbolic=/usr/local/bin/analyze
 
 if [ ! -f symbolic ]; then
