@@ -29,9 +29,6 @@ The second folder we called `folderB` which you want to analyze.
 --dead-code Functions you do not use
 ```
 
-## Create symbolic
-    ./install.sh
-
 ## Limitation
 1. Object in function parameter  
 2. Factory mode
