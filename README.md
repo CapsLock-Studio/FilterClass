@@ -2,6 +2,7 @@ FilterClass
 --
 
 ![](https://travis-ci.org/CapsLock-Studio/FilterClass.svg)
+[![Code Climate](https://codeclimate.com/github/CapsLock-Studio/FilterClass/badges/gpa.svg)](https://codeclimate.com/github/CapsLock-Studio/FilterClass)
 ![](http://php7ready.timesplinter.ch/Codeception/Codeception/badge.svg)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 
