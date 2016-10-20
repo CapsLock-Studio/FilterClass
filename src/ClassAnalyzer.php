@@ -87,7 +87,13 @@ class ClassAnalyzer
     {
         $collectedClass = [];
         $this->getClassAndPath($this->getFromPath(), $collectedClass);
+        $this->analyzeContainClass($this->getFromPath(), $collectedClass);
         $this->analyzeContainClass($this->getToPath(), $collectedClass);
+        foreach ($this->unused as $class => $method) {
+            if (isset($this->used[$class])) {
+                $this->unused[$class] = array_diff($this->unused[$class], $this->used[$class]);
+            }
+        }
     }
 
     /**
@@ -250,7 +256,7 @@ class ClassAnalyzer
      */
     private function getClassAndNamespaceFromFilePath($path)
     {
-        $fileContent = php_strip_whitespace($path);
+        $fileContent = file_get_contents($path);
         if (preg_match(self::REGEX["class"], $fileContent, $match)) {
             preg_match(self::REGEX["namespace"], $fileContent, $namespace);
             preg_match_all(self::REGEX["function"], $fileContent, $functions);
