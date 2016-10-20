@@ -253,10 +253,34 @@ class ClassAnalyzer
      *
      * @param string $path 路徑
      * @return array
+     *
+     * @see http://stackoverflow.com/questions/503871/best-way-to-automatically-remove-comments-from-php-code
      */
     private function getClassAndNamespaceFromFilePath($path)
     {
-        $fileContent = file_get_contents($path);
+        $fileStr     = file_get_contents($path);
+        $fileContent = "";
+
+        $commentTokens = [T_COMMENT];
+
+        if (defined('T_DOC_COMMENT'))
+            $commentTokens[] = T_DOC_COMMENT; // PHP 5
+        if (defined('T_ML_COMMENT'))
+            $commentTokens[] = T_ML_COMMENT;  // PHP 4
+
+        $tokens = token_get_all($fileStr);
+
+        foreach ($tokens as $token) {
+            if (is_array($token)) {
+                if (in_array($token[0], $commentTokens))
+                    continue;
+
+                $token = $token[1];
+            }
+
+            $fileContent .= $token;
+        }
+
         if (preg_match(self::REGEX["class"], $fileContent, $match)) {
             preg_match(self::REGEX["namespace"], $fileContent, $namespace);
             preg_match_all(self::REGEX["function"], $fileContent, $functions);
