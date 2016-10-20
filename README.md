@@ -22,7 +22,7 @@ The second folder we called `folderB` which you want to analyze.
 
 ## Usage
 ```
-./bin/analyze [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
+analyze [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
 
 -f          folderA
 -t          folderB
