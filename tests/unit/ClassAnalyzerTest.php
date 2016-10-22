@@ -71,8 +71,11 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
 
         $filter->setShowOutputAfterCreatedFlag(true);
         $flag = $filter->getShowOutputAfterCreatedFlag();
-
         $this->assertTrue($flag);
+
+        $filter->setShowOutputAfterCreatedFlag(false);
+        $flag = $filter->getShowOutputAfterCreatedFlag();
+        $this->assertFalse($flag);
     }
 
     public function testGetResultResource()
