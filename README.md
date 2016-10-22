@@ -19,8 +19,11 @@ The second folder we called `folderB` which you want to analyze.
     composer require "capslock-studio/filter-class"
 
 ## You can clone this package independently
-    git clone https://github.com/CapsLock-Studio/FilterClass.git
-    composer install
+```
+git clone https://github.com/CapsLock-Studio/FilterClass.git
+
+composer install
+```
 
 ## Usage
 ```
