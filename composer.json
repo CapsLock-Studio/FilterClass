@@ -6,7 +6,6 @@
         "nikic/php-parser": "^2.1"
     },
     "license" : "MIT",
-    "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
