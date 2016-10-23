@@ -78,33 +78,41 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $this->assertFalse($flag);
     }
 
-    public function testGetResultResource()
-    {
-        $filter = new ClassAnalyzer([
-            "fromPath" => __DIR__,
-            "toPath"   => __DIR__,
-        ]);
-
-        $fn = $filter->getResultResource();
-
-        $this->assertNotEquals(false, $fn);
-    }
-
     public function testAnalyze()
     {
         $path   = __DIR__ . "/../_data/Foo";
-        $filter = new ClassAnalyzer([
+        $filterShowResult = new ClassAnalyzer([
             "fromPath" => $path,
             "toPath"   => $path,
         ]);
 
-        $filter->analyze();
-        $unused = $filter->getUnusedCode();
+        ob_start();
+        $filterShowResult->setShowOutputAfterCreatedFlag(true);
+        $filterShowResult->analyze();
+        $unused = $filterShowResult->getUnusedCode();
+        unset($filterShowResult);
+
+        $result1 = ob_get_clean();
+
+        $filterNotShowResult = new ClassAnalyzer([
+            "fromPath" => $path,
+            "toPath"   => $path,
+        ]);
+
+        ob_start();
+        $filterNotShowResult->setShowOutputAfterCreatedFlag(false);
+        $filterNotShowResult->analyze();
+        $unused = $filterNotShowResult->getUnusedCode();
+        unset($filterNotShowResult);
+
+        $result2 = ob_get_clean();
 
         $this->assertTrue(isset($unused["Bar"]));
         $this->assertTrue(isset($unused["Bar1"]));
         $this->assertTrue(in_array("testNotUsed", $unused["Bar"]));
         $this->assertFalse(in_array("testIsUsed", $unused["Bar"]));
         $this->assertFalse(in_array("testParentUsed", $unused["Bar"]));
+        $this->assertNotEmpty($result1);
+        $this->assertEmpty($result2);
     }
 }

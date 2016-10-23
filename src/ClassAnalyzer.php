@@ -39,9 +39,10 @@ class ClassAnalyzer
     {
         $templateConfig = ["fromPath" => "", "toPath" => ""];
         $config         = array_merge($templateConfig, $config);
-        $this->fn       = fopen("php://memory", "wb");
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
+
+        $this->setResultResource();
 
         if (!is_dir($this->getFromPath())) {
             throw new Exception("Defined `fromPath` is not valid");
@@ -50,6 +51,8 @@ class ClassAnalyzer
         if ($this->getToPath() && !is_dir($this->getToPath())) {
             throw new Exception("Defined `toPath` is not valid");
         }
+
+        fputs($this->fn, "[");
     }
 
     /**
@@ -94,6 +97,8 @@ class ClassAnalyzer
                 $this->unused[$class] = array_diff($this->unused[$class], $this->used[$class]);
             }
         }
+
+        fputs($this->getResultResource(), "]");
     }
 
     /**
@@ -139,15 +144,6 @@ class ClassAnalyzer
     public function getToPath()
     {
         return $this->toPath;
-    }
-
-    /**
-     * 取得目前正在處理的檔案
-     * @return resource
-     */
-    public function getResultResource()
-    {
-        return $this->fn;
     }
 
     /**
@@ -209,20 +205,29 @@ class ClassAnalyzer
                     if (!in_array($keymap, $resource)) {
                         $this->used = array_merge_recursive($code, $this->used);
 
-                        $used     = isset($this->used[$matched["class"]]) ? $this->used[$matched["class"]] : [];
-                        $methods  = isset($code[$matched["class"]]) ? $code[$matched["class"]] : [];
-                        $content  = "find pattern: {$pattern}\n";
-                        $content .= "find match class: {$matched["class"]}\n";
-                        $content .= "in path: {$filePath}\n";
-                        $content .= "from path: {$fromPath}\n";
-                        $content .= "find namespace: {$matched["namespace"]}\n";
-                        $content .= "find method: " . json_encode($methods) . "\n\n";
-                        $unused   = array_diff($matched["functions"], $used);
+                        $used    = isset($this->used[$matched["class"]]) ? $this->used[$matched["class"]] : [];
+                        $methods = isset($code[$matched["class"]]) ? $code[$matched["class"]] : [];
+                        $methods = array_unique($methods);
+                        sort($methods);
+
+                        $content = [];
+                        $content["pattern"]   = $pattern;
+                        $content["match"]     = $matched["class"];
+                        $content["path"]      = $filePath;
+                        $content["found"]     = $fromPath;
+                        $content["namespace"] = $matched["namespace"];
+                        $content["method"]    = $methods;
+
+                        $unused = array_diff($matched["functions"], $used);
                         $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
                         $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
 
+                        if ($resource) {
+                            fputs($fn, ",");
+                        }
+
                         $resource[] = $keymap;
-                        fputs($fn, $content);
+                        fputs($fn, json_encode($content, JSON_PRETTY_PRINT));
                     }
                 }
             }
@@ -340,5 +345,23 @@ class ClassAnalyzer
         }
 
         return $code;
+    }
+
+    /**
+     * 取得目前正在處理的檔案
+     * @return resource
+     */
+    private function setResultResource()
+    {
+        $this->fn = fopen("php://memory", "wb");
+    }
+
+    /**
+     * 取得目前正在處理的檔案
+     * @return resource
+     */
+    private function getResultResource()
+    {
+        return $this->fn;
     }
 }
