@@ -35,8 +35,10 @@ class MethodVisitor extends NodeVisitorAbstract
             $expr = $node->expr;
             if ($expr instanceof Node\Expr\New_) {
                 $expr = $expr->class->parts;
-                $expr = array_pop($expr);
-                $this->objectMap[$var->name] = $expr;
+                if (is_array($expr)) {
+                    $expr = array_pop($expr);
+                    $this->objectMap[$var->name] = $expr;
+                }
             }
         }
 
