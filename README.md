@@ -34,6 +34,7 @@ composer install
 --dead-code Functions you do not use
 ```
 
-## Limitation
+## Limitation(Knowing Issue)
 1. Object in function parameter  
 2. Factory mode
+3. Initialize class whiout use statement
