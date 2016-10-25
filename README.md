@@ -37,4 +37,3 @@ composer install
 ## Limitation(Knowing Issue)
 1. Object in function parameter  
 2. Factory mode
-3. Initialize class without use statement
