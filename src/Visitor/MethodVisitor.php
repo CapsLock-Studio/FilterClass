@@ -82,7 +82,7 @@ class MethodVisitor extends NodeVisitorAbstract
             }
         }
 
-        if ($codeClass === "self" || $codeClass === "this") {
+        if ($codeClass === "self" || $codeClass === "this" || $codeClass === "static") {
             $codeClass = $this->classname;
             $useThis   = true;
         }

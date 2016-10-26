@@ -21,6 +21,9 @@ class ClassVisitor extends NodeVisitorAbstract
         $printer = new PrettyPrinter\Standard;
         if ($node instanceof Node\Stmt\Class_) {
             $this->classname = $node->name;
+            if (isset($node->extends)) {
+                $this->parent = implode("\\", $node->extends->parts);
+            }
         }
 
         if ($node instanceof Node\Stmt\Namespace_) {
@@ -67,15 +70,13 @@ class ClassVisitor extends NodeVisitorAbstract
             // parse method in each method call
             $traverser->traverse($stmts);
 
+            // TODO: handle private function
+
+            // get used code
             $code = $methodVisitor->getCode();
 
             $this->code = array_merge_recursive($this->code, $code);
         }
-    }
-
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
     }
 
     public function getCode()

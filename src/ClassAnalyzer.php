@@ -344,12 +344,8 @@ class ClassAnalyzer
         $parser    = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
         $content   = php_strip_whitespace($path);
         if (preg_match(self::REGEX["extends"], $content, $match)) {
-            $classname = $match[1];
-            $parent    = isset($match[3]) ? $match[3] : "";
-
             // visitor class method
             $classVisitor = new ClassVisitor();
-            $classVisitor->setParent($parent);
             $traverser->addVisitor($classVisitor);
 
             // parse it
