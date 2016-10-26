@@ -13,6 +13,7 @@ class MethodVisitor extends NodeVisitorAbstract
     private $namespace = "";
     private $parent    = "";
     private $objectMap = [];
+    private $use       = [];
 
     public function __construct($parent)
     {
@@ -34,7 +35,7 @@ class MethodVisitor extends NodeVisitorAbstract
     {
         $codeClass = "";
         $codeName  = "";
-        $namespace = [];
+        $namespace = "";
         $useThis   = false;
         if ($node instanceof Node\Expr\Assign) {
             $var  = $node->var;
@@ -102,10 +103,19 @@ class MethodVisitor extends NodeVisitorAbstract
         return $this->code;
     }
 
+    public function setUseStmt($use)
+    {
+        $this->use = $use;
+    }
+
     private function assign($namespace, $codeClass, $codeName)
     {
         if (is_string($codeClass) && is_string($codeName)) {
-            $namespace = $namespace ? $namespace : $this->namespace;
+            $slice     = explode("\\", $namespace);
+            $part      = array_shift($slice);
+            $namespace = implode("\\", $slice);
+            $prefix    = isset($this->use[$part]) ? $this->use[$part] : "";
+            $namespace = $prefix ? "{$prefix}\\{$namespace}" : ($namespace ? $namespace : $this->namespace);
             $codeClass = $namespace ? "{$namespace}\\{$codeClass}" : $codeClass;
             $this->code[$codeClass]   = isset($this->code[$codeClass]) ? $this->code[$codeClass] : [];
             $this->code[$codeClass][] = $codeName;

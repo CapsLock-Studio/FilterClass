@@ -11,6 +11,7 @@ use PhpParser\NodeTraverser;
 class ClassVisitor extends NodeVisitorAbstract
 {
     private $code      = [];
+    private $use       = [];
     private $classname = "";
     private $namespace = "";
     private $parent    = "";
@@ -24,6 +25,13 @@ class ClassVisitor extends NodeVisitorAbstract
 
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->namespace = $node->name;
+        }
+
+        if ($node instanceof Node\Stmt\Use_) {
+            foreach ($node->uses as $use) {
+                $namespace             = isset($use->alias) ? $use->alias : end($use->parts);
+                $this->use[$namespace] = implode("\\", $use->parts);
+            }
         }
     }
 
@@ -42,6 +50,7 @@ class ClassVisitor extends NodeVisitorAbstract
 
             // visitor class method
             $methodVisitor = new MethodVisitor($this->parent);
+            $methodVisitor->setUseStmt($this->use);
             $traverser->addVisitor($methodVisitor);
 
             // set class name
