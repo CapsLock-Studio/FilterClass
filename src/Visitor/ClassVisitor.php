@@ -27,10 +27,12 @@ class ClassVisitor extends NodeVisitorAbstract
             $this->namespace = $node->name;
         }
 
-        if ($node instanceof Node\Stmt\Use_) {
+        if ($node instanceof Node\Stmt\Use_ || $node instanceof Node\Stmt\GroupUse) {
+            $prefix = isset($node->prefix) ? implode("\\", $node->prefix->parts) : "";
             foreach ($node->uses as $use) {
-                $namespace             = isset($use->alias) ? $use->alias : end($use->parts);
-                $this->use[$namespace] = implode("\\", $use->parts);
+                array_pop($use->name->parts);
+                $namespace             = isset($use->alias) ? $use->alias : end($use->name->parts);
+                $this->use[$namespace] = ($prefix ? "{$prefix}\\" : "") . implode("\\", $use->name->parts);
             }
         }
     }

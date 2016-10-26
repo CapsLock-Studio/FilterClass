@@ -110,13 +110,14 @@ class MethodVisitor extends NodeVisitorAbstract
 
     private function assign($namespace, $codeClass, $codeName)
     {
-        if (is_string($codeClass) && is_string($codeName)) {
+        if (is_string($codeClass) && is_string($codeName) && $codeClass && $codeName) {
             $slice     = explode("\\", $namespace);
             $part      = array_shift($slice);
             $namespace = implode("\\", $slice);
-            $prefix    = isset($this->use[$part]) ? $this->use[$part] : "";
-            $namespace = $prefix ? "{$prefix}\\{$namespace}" : ($namespace ? $namespace : $this->namespace);
+            $prefix    = isset($this->use[$part ?: $codeClass]) ? $this->use[$part ?: $codeClass] : "";
+            $namespace = $prefix && $namespace ? "{$prefix}\\{$namespace}" : ($prefix ? $prefix : ($namespace ? $namespace : $this->namespace));
             $codeClass = $namespace ? "{$namespace}\\{$codeClass}" : $codeClass;
+            $codeClass = preg_replace("/[\\\]+/", "\\", $codeClass);
             $this->code[$codeClass]   = isset($this->code[$codeClass]) ? $this->code[$codeClass] : [];
             $this->code[$codeClass][] = $codeName;
             $this->code[$codeClass]   = array_unique($this->code[$codeClass]);

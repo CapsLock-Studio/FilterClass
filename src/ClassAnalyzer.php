@@ -189,11 +189,29 @@ class ClassAnalyzer
             foreach ($matchClass as $matched) {
                 $pattern        = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
                 $regexUse       = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
+                $regexGroupUse  = "/" . quotemeta($matched["namespace"]) . "\\\{([A-Za-z0-9_, ]+)\}/";
+                $groupUseMatch  = preg_match_all($regexGroupUse, $fileContent, $matchedGroupUse);
                 $extendsMatch   = @preg_match(self::REGEX["extends"], $fileContent, $matchedExtends);
                 $classFound     = @preg_match($regexUse, $fileContent, $matchedUse);
                 $matchUseClass  = isset($matchedUse[2]) ? $matchedUse[2] : $matched["class"];
                 $matchedExtends = isset($matchedExtends[3]) ? $matchedExtends[3] : null;
-                if ($classFound || $filePath === $matched["path"] || $matchedExtends === $matchUseClass) {
+                $groupUseFound  = false;
+
+                foreach ($matchedGroupUse[1] as $groupMatch) {
+                    $groupMatch = explode(",", $groupMatch);
+                    foreach ($groupMatch as $group) {
+                        $group = trim($group);
+                        if ($group == $matched["class"]) {
+                            $groupUseFound = true;
+                        }
+                    }
+                }
+
+                if ($classFound || $filePath === $matched["path"] || $matchedExtends === $matchUseClass || $groupUseFound) {
+                    if ($groupUseFound) {
+                        $used = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
+                    }
+
                     $fromPath = str_replace($this->getBasePath(), "", $fromPath);
                     $filePath = str_replace($this->getBasePath(), "", $filePath);
                     $keymap   = [
@@ -204,7 +222,6 @@ class ClassAnalyzer
 
                     if (!in_array($keymap, $resource)) {
                         $this->used = array_merge_recursive($code, $this->used);
-
                         $used    = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
                         $methods = isset($code[$pattern]) ? $code[$pattern] : [];
                         $methods = array_unique($methods);

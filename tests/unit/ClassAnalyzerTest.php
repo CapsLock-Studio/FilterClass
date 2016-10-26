@@ -113,6 +113,8 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\Bar"]));
         $this->assertFalse(in_array("testUseInBar2", $unused["Foo\Bar"]));
         $this->assertFalse(in_array("testParentUsed", $unused["Foo\Bar"]));
+        $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar1"]));
+        $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar"]));
         $this->assertNotEmpty($result1);
         $this->assertEmpty($result2);
     }
