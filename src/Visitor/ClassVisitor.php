@@ -12,6 +12,7 @@ class ClassVisitor extends NodeVisitorAbstract
 {
     private $code      = [];
     private $classname = "";
+    private $namespace = "";
     private $parent    = "";
 
     public function enterNode(Node $node)
@@ -19,6 +20,10 @@ class ClassVisitor extends NodeVisitorAbstract
         $printer = new PrettyPrinter\Standard;
         if ($node instanceof Node\Stmt\Class_) {
             $this->classname = $node->name;
+        }
+
+        if ($node instanceof Node\Stmt\Namespace_) {
+            $this->namespace = $node->name;
         }
     }
 
@@ -42,8 +47,11 @@ class ClassVisitor extends NodeVisitorAbstract
             // set class name
             $classname = $this->classname ?: "TEST";
 
+            // set namespace
+            $namespace = $this->namespace ? "namespace {$this->namespace};" : "";
+
             // parse it
-            $stmts = $parser->parse("<?php class {$classname}{{$code}}");
+            $stmts = $parser->parse("<?php {$namespace} class {$classname}{{$code}}");
 
             // parse method in each method call
             $traverser->traverse($stmts);
@@ -52,11 +60,6 @@ class ClassVisitor extends NodeVisitorAbstract
 
             $this->code = array_merge_recursive($this->code, $code);
         }
-    }
-
-    public function setClassName($classname)
-    {
-        $this->classname = $classname;
     }
 
     public function setParent($parent)

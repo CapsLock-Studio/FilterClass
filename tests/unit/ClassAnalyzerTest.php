@@ -104,14 +104,15 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $filterNotShowResult->analyze();
         $unused = $filterNotShowResult->getUnusedCode();
         unset($filterNotShowResult);
-
         $result2 = ob_get_clean();
 
-        $this->assertTrue(isset($unused["Bar"]));
-        $this->assertTrue(isset($unused["Bar1"]));
-        $this->assertTrue(in_array("testNotUsed", $unused["Bar"]));
-        $this->assertFalse(in_array("testIsUsed", $unused["Bar"]));
-        $this->assertFalse(in_array("testParentUsed", $unused["Bar"]));
+        $this->assertTrue(isset($unused["Foo\Bar"]));
+        $this->assertTrue(isset($unused["Foo\Bar1"]));
+        $this->assertTrue(in_array("testNotUsedInNestedNamespace", $unused["Foo\Bar\Bar"]));
+        $this->assertTrue(in_array("testNotUsed", $unused["Foo\Bar"]));
+        $this->assertFalse(in_array("testIsUsed", $unused["Foo\Bar"]));
+        $this->assertFalse(in_array("testUseInBar2", $unused["Foo\Bar"]));
+        $this->assertFalse(in_array("testParentUsed", $unused["Foo\Bar"]));
         $this->assertNotEmpty($result1);
         $this->assertEmpty($result2);
     }

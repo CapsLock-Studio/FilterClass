@@ -10,6 +10,7 @@ class MethodVisitor extends NodeVisitorAbstract
 {
     private $code      = [];
     private $classname = "";
+    private $namespace = "";
     private $parent    = "";
     private $objectMap = [];
 
@@ -22,6 +23,10 @@ class MethodVisitor extends NodeVisitorAbstract
     {
         if ($node instanceof Node\Stmt\Class_) {
             $this->classname = $node->name;
+        }
+
+        if ($node instanceof Node\Stmt\Namespace_) {
+            $this->namespace = $node->name;
         }
     }
 
@@ -55,7 +60,7 @@ class MethodVisitor extends NodeVisitorAbstract
         if ($node instanceof Node\Expr\StaticCall) {
             $codeClass = $node->class;
             if ($codeClass instanceof Node\Name) {
-                $codeClass = array_pop($codeClass->parts);
+                $codeClass = $codeClass->getLast();
             }
 
             if ($codeClass instanceof Node\Expr\Variable) {
@@ -95,6 +100,7 @@ class MethodVisitor extends NodeVisitorAbstract
     private function assign($codeClass, $codeName)
     {
         if (is_string($codeClass) && is_string($codeName)) {
+            $codeClass = $this->namespace ? "{$this->namespace}\\{$codeClass}" : $codeClass;
             $this->code[$codeClass]   = isset($this->code[$codeClass]) ? $this->code[$codeClass] : [];
             $this->code[$codeClass][] = $codeName;
             $this->code[$codeClass]   = array_unique($this->code[$codeClass]);

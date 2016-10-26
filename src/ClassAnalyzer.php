@@ -187,7 +187,7 @@ class ClassAnalyzer
         $code = $this->getCode($filePath);
         foreach ($matchClassPath as $fromPath => $matchClass) {
             foreach ($matchClass as $matched) {
-                $pattern        = "{$matched["namespace"]}\\{$matched["class"]}";
+                $pattern        = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
                 $regexUse       = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
                 $extendsMatch   = @preg_match(self::REGEX["extends"], $fileContent, $matchedExtends);
                 $classFound     = @preg_match($regexUse, $fileContent, $matchedUse);
@@ -205,8 +205,8 @@ class ClassAnalyzer
                     if (!in_array($keymap, $resource)) {
                         $this->used = array_merge_recursive($code, $this->used);
 
-                        $used    = isset($this->used[$matched["class"]]) ? $this->used[$matched["class"]] : [];
-                        $methods = isset($code[$matched["class"]]) ? $code[$matched["class"]] : [];
+                        $used    = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
+                        $methods = isset($code[$pattern]) ? $code[$pattern] : [];
                         $methods = array_unique($methods);
                         sort($methods);
 
@@ -219,8 +219,8 @@ class ClassAnalyzer
                         $content["method"]    = $methods;
 
                         $unused = array_diff($matched["functions"], $used);
-                        $this->unused[$matched["class"]] = isset($this->unused[$matched["class"]]) ? $this->unused[$matched["class"]] : [];
-                        $this->unused[$matched["class"]] = $this->unused[$matched["class"]] ? array_intersect($this->unused[$matched["class"]], $unused) : $unused;
+                        $this->unused[$pattern] = isset($this->unused[$pattern]) ? $this->unused[$pattern] : [];
+                        $this->unused[$pattern] = $this->unused[$pattern] ? array_intersect($this->unused[$pattern], $unused) : $unused;
 
                         if ($resource) {
                             fputs($fn, ",");
@@ -332,7 +332,6 @@ class ClassAnalyzer
 
             // visitor class method
             $classVisitor = new ClassVisitor();
-            $classVisitor->setClassName($classname);
             $classVisitor->setParent($parent);
             $traverser->addVisitor($classVisitor);
 
