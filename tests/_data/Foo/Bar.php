@@ -30,4 +30,9 @@ class Bar
     {
         $foo = new Bar1;
     }
+
+    public function testUseInBar2()
+    {
+
+    }
 }
