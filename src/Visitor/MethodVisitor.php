@@ -34,14 +34,16 @@ class MethodVisitor extends NodeVisitorAbstract
     {
         $codeClass = "";
         $codeName  = "";
+        $namespace = [];
         $useThis   = false;
         if ($node instanceof Node\Expr\Assign) {
             $var  = $node->var;
             $expr = $node->expr;
             if ($expr instanceof Node\Expr\New_) {
-                $expr = $expr->class->parts;
-                if (is_array($expr)) {
-                    $expr = array_pop($expr);
+                $exprAry = $expr->class->parts;
+                if (is_array($exprAry)) {
+                    $expr      = array_pop($exprAry);
+                    $namespace = implode("\\", $exprAry);
                     $this->objectMap[$var->name] = $expr;
                 }
             }
@@ -51,16 +53,19 @@ class MethodVisitor extends NodeVisitorAbstract
             $printer = new PrettyPrinter\Standard;
             $code    = $printer->prettyPrint([$node]);
             if (preg_match("/^([A-Za-z0-9]+)\:\:([A-Za-z0-9]+)\s*\(/", $code, $match)) {
-                $codeClass = explode("\\", $match[1]);
-                $codeClass = end($codeClass);
-                $codeName  = $match[2];
+                $codeClassAry = explode("\\", $match[1]);
+                $codeClass    = array_pop($codeClassAry);
+                $namespace    = implode("\\", $codeClassAry);
+                $codeName     = $match[2];
             }
         }
 
         if ($node instanceof Node\Expr\StaticCall) {
             $codeClass = $node->class;
             if ($codeClass instanceof Node\Name) {
-                $codeClass = $codeClass->getLast();
+                $codeClassAry = $codeClass->parts;
+                $codeClass    = array_pop($codeClassAry);
+                $namespace    = implode("\\", $codeClassAry);
             }
 
             if ($codeClass instanceof Node\Expr\Variable) {
@@ -86,9 +91,9 @@ class MethodVisitor extends NodeVisitorAbstract
         }
 
         $codeName = isset($node->name) ? $node->name : $codeName;
-        $this->assign($codeClass, $codeName);
+        $this->assign($namespace, $codeClass, $codeName);
         if ($useThis) {
-            $this->assign($this->parent, $codeName);
+            $this->assign($namespace, $this->parent, $codeName);
         }
     }
 
@@ -97,10 +102,11 @@ class MethodVisitor extends NodeVisitorAbstract
         return $this->code;
     }
 
-    private function assign($codeClass, $codeName)
+    private function assign($namespace, $codeClass, $codeName)
     {
         if (is_string($codeClass) && is_string($codeName)) {
-            $codeClass = $this->namespace ? "{$this->namespace}\\{$codeClass}" : $codeClass;
+            $namespace = $namespace ? $namespace : $this->namespace;
+            $codeClass = $namespace ? "{$namespace}\\{$codeClass}" : $codeClass;
             $this->code[$codeClass]   = isset($this->code[$codeClass]) ? $this->code[$codeClass] : [];
             $this->code[$codeClass][] = $codeName;
             $this->code[$codeClass]   = array_unique($this->code[$codeClass]);

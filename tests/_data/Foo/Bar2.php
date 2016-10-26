@@ -10,4 +10,9 @@ class Bar2
         $foo = new Bar;
         $foo->testUseInBar2();
     }
+
+    public function testStaticCall()
+    {
+        Foo\Bar::testStaicUsed();
+    }
 }
