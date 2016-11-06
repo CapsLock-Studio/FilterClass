@@ -56,7 +56,12 @@ class Method_ extends Visitor
         if ($node instanceof Node\Expr\MethodCall) {
             $codeClass = $node->var;
             if (isset($codeClass->name)) {
-                $codeClass = isset($this->objectMap[$codeClass->name]) ? $this->objectMap[$codeClass->name] : $codeClass->name;
+                $codeClass = !is_object($codeClass->name) && isset($this->objectMap[$codeClass->name]) ? $this->objectMap[$codeClass->name] : $codeClass->name;
+            }
+
+            if (is_object($codeClass) && $codeClass instanceof Node\Name) {
+                $codeName  = implode("->", $codeClass->parts);
+                $codeClass = "";
             }
         }
 
