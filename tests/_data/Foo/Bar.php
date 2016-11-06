@@ -35,4 +35,9 @@ class Bar
     {
 
     }
+
+    public function testUndefinedFunction()
+    {
+        IamUndefinedFunction()->call();
+    }
 }
