@@ -3,33 +3,11 @@
 namespace FilterClass\Visitor;
 
 use PhpParser\Node;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\PrettyPrinter;
+use FilterClass\Visitor;
 
-class MethodVisitor extends NodeVisitorAbstract
+class Method_ extends Visitor
 {
-    private $code      = [];
-    private $classname = "";
-    private $namespace = "";
-    private $parent    = "";
     private $objectMap = [];
-    private $use       = [];
-
-    public function __construct($parent)
-    {
-        $this->parent = $parent;
-    }
-
-    public function enterNode(Node $node)
-    {
-        if ($node instanceof Node\Stmt\Class_) {
-            $this->classname = $node->name;
-        }
-
-        if ($node instanceof Node\Stmt\Namespace_) {
-            $this->namespace = $node->name;
-        }
-    }
 
     public function leaveNode(Node $node)
     {
@@ -51,7 +29,7 @@ class MethodVisitor extends NodeVisitorAbstract
         }
 
         if (!$node instanceof Node\Scalar\EncapsedStringPart) {
-            $printer = new PrettyPrinter\Standard;
+            $printer = $this->getPrinter();
             $code    = $printer->prettyPrint([$node]);
             if (preg_match("/^([A-Za-z0-9]+)\:\:([A-Za-z0-9]+)\s*\(/", $code, $match)) {
                 $codeClassAry = explode("\\", $match[1]);
@@ -96,16 +74,6 @@ class MethodVisitor extends NodeVisitorAbstract
         if ($useThis) {
             $this->assign($namespace, $this->parent, $codeName);
         }
-    }
-
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    public function setUseStmt($use)
-    {
-        $this->use = $use;
     }
 
     private function assign($namespace, $codeClass, $codeName)

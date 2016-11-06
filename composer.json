@@ -1,7 +1,13 @@
 {
     "name": "capslock-studio/filter-class",
     "type": "library",
-    "description": "A function & class parser",
+    "description": "A tool to analyze functions usage in folders",
+    "authors": [
+        {
+            "name": "michael34435",
+            "email": "michael34435@capslock.tw"
+        }
+    ],
     "require": {
         "nikic/php-parser": "^2.1"
     },

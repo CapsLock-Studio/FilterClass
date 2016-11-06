@@ -4,7 +4,7 @@ namespace FilterClass;
 
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
-use FilterClass\Visitor\ClassVisitor;
+use FilterClass\Visitor\Class_;
 use FilterClass\Visitor\MethodVisitor;
 
 /**
@@ -17,9 +17,9 @@ class ClassAnalyzer
 
     const REGEX = [
         "extends"   => "/class\s+([A-Za-z0-9]+)(\s+extends\s+([A-Za-z0-9]+))*/",
-        "namespace" => "/namespace\s+(.*);/",
+        "namespace" => "/namespace\s+([A-Za-z0-9\\\]+);/",
         "class"     => "/class\s+([A-Za-z0-9_]+)/",
-        "function"  => "/function\s+([A-Za-z0-9_]+)/",
+        "function"  => "/(private|protected|public)*\s*(static)*\s*function\s+([A-Za-z0-9_]+)/",
     ];
 
     private $fn       = null;
@@ -302,11 +302,17 @@ class ClassAnalyzer
         if (preg_match(self::REGEX["class"], $fileContent, $match)) {
             preg_match(self::REGEX["namespace"], $fileContent, $namespace);
             preg_match_all(self::REGEX["function"], $fileContent, $functions);
+            $type = [];
+            foreach ($functions[3] as $key => $function) {
+                $type[$function] = $functions[1][$key];
+            }
+
             return [
                 "path"      => $path,
                 "class"     => $match[1],
                 "namespace" => isset($namespace[1]) ? $namespace[1] : "",
-                "functions" => $functions[1],
+                "functions" => $functions[3],
+                "type"      => $type,
             ];
         }
 
@@ -345,7 +351,7 @@ class ClassAnalyzer
         $content   = php_strip_whitespace($path);
         if (preg_match(self::REGEX["extends"], $content, $match)) {
             // visitor class method
-            $classVisitor = new ClassVisitor();
+            $classVisitor = new Class_();
             $traverser->addVisitor($classVisitor);
 
             // parse it
