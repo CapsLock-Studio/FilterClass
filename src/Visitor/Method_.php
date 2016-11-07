@@ -66,6 +66,7 @@ class Method_ extends Visitor
 
             if ($codeClass instanceof Node\Expr\New_) {
                 $codeClass = array_pop($codeClass->class->parts);
+                $namespace = implode("\\", $codeClass->class->parts);
                 $codeClass = isset($this->objectMap[$codeClass]) ? $this->objectMap[$codeClass] : $codeClass;
             }
         }
