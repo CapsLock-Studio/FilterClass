@@ -14,4 +14,9 @@ class Bar1 extends Bar
     {
         parent::testStaicUsed();
     }
+
+    public function test2()
+    {
+        (new Bar())->testOneLineFunction();
+    }
 }

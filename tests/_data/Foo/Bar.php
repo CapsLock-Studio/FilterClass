@@ -40,4 +40,9 @@ class Bar
     {
         IamUndefinedFunction()->call();
     }
+
+    public function testOneLineFunction()
+    {
+      
+    }
 }

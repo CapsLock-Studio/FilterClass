@@ -5,7 +5,6 @@ namespace FilterClass;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
 use FilterClass\Visitor\Class_;
-use FilterClass\Visitor\MethodVisitor;
 
 /**
  * @author michael34435 <michael34435@capslock.tw>

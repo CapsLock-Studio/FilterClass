@@ -59,9 +59,13 @@ class Method_ extends Visitor
                 $codeClass = !is_object($codeClass->name) && isset($this->objectMap[$codeClass->name]) ? $this->objectMap[$codeClass->name] : $codeClass->name;
             }
 
-            if (is_object($codeClass) && $codeClass instanceof Node\Name) {
+            if ($codeClass instanceof Node\Name) {
                 $codeName  = implode("->", $codeClass->parts);
                 $codeClass = "";
+            }
+
+            if ($codeClass instanceof Node\Expr\New_) {
+                $codeClass = array_pop($codeClass->class->parts);
             }
         }
 
