@@ -16,17 +16,19 @@ The first folder we called `folderA` that it is your based folder.
 The second folder we called `folderB` which you want to analyze.  
 
 ## Install package from Composer
-    composer require "capslock-studio/filter-class"
+```sh
+composer require "capslock-studio/filter-class"
+```
 
 ## You can clone this package independently
-```
+```sh
 git clone https://github.com/CapsLock-Studio/FilterClass.git
 
 composer install
 ```
 
 ## Usage
-```
+```sh
 ./bin/analyze [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
 
 -f          folderA
