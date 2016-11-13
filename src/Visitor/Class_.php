@@ -1,11 +1,11 @@
 <?php
 
-namespace FilterClass\Visitor;
+namespace CapsLockStudio\FilterClass\Visitor;
 
 use PhpParser\Node;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
-use FilterClass\Visitor;
+use CapsLockStudio\FilterClass\Visitor;
 
 class Class_ extends Visitor
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace FilterClass;
+namespace CapsLockStudio\FilterClass;
 
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser;
-use FilterClass\Visitor\Class_;
+use CapsLockStudio\FilterClass\Visitor\Class_;
 
 /**
  * @author michael34435 <michael34435@capslock.tw>

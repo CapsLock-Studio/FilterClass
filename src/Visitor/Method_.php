@@ -1,9 +1,9 @@
 <?php
 
-namespace FilterClass\Visitor;
+namespace CapsLockStudio\FilterClass\Visitor;
 
 use PhpParser\Node;
-use FilterClass\Visitor;
+use CapsLockStudio\FilterClass\Visitor;
 
 class Method_ extends Visitor
 {

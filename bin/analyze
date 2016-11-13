@@ -21,7 +21,7 @@ require __DIR__ . "/../vendor/autoload.php";
 $unused = [];
 
 foreach ($toFolder as $folder) {
-    $filter = new FilterClass\ClassAnalyzer([
+    $filter = new CapsLockStudio\FilterClass\ClassAnalyzer([
         "fromPath" => $fromFolder,
         "toPath"   => $folder,
     ]);

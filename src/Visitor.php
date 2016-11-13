@@ -1,6 +1,6 @@
 <?php
 
-namespace FilterClass;
+namespace CapsLockStudio\FilterClass;
 
 use PhpParser\Node;
 use PhpParser\PrettyPrinter;

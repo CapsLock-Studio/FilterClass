@@ -1,6 +1,6 @@
 <?php
 
-namespace FilterClass;
+namespace CapsLockStudio\FilterClass;
 
 class Exception extends \Exception
 {

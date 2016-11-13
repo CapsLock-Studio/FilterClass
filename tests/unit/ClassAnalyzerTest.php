@@ -1,8 +1,8 @@
 <?php
 
 use Codeception\Util\Debug;
-use FilterClass\ClassAnalyzer;
-use FilterClass\Exception;
+use CapsLockStudio\FilterClass\ClassAnalyzer;
+use CapsLockStudio\FilterClass\Exception;
 
 class ClassAnalyzerTest extends \Codeception\Test\Unit
 {
@@ -20,7 +20,7 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @expectedException FilterClass\Exception
+     * @expectedException CapsLockStudio\FilterClass\Exception
      */
     public function testInvalidFromPath()
     {
@@ -31,7 +31,7 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @expectedException FilterClass\Exception
+     * @expectedException CapsLockStudio\FilterClass\Exception
      */
     public function testInvalidToPath()
     {
@@ -42,7 +42,7 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
     }
 
     /**
-     * @expectedException FilterClass\Exception
+     * @expectedException CapsLockStudio\FilterClass\Exception
      */
     public function testNoConfig()
     {
