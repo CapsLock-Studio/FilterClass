@@ -18,16 +18,16 @@ class ClassAnalyzer
     ];
 
     private $fn             = null;
+    private $show           = false;
     private $fromPath       = "";
     private $toPath         = "";
     private $basePath       = "";
-    private $show           = false;
     private $report         = "";
+    private $total          = 0;
     private $unused         = [];
     private $used           = [];
     private $lines          = [];
     private $mapping        = [];
-    private $total          = 0;
     private $collectedClass = [];
 
     /**
@@ -39,16 +39,19 @@ class ClassAnalyzer
         $templateConfig = ["fromPath" => "", "toPath" => ""];
         $config         = array_merge($templateConfig, $config);
         $this->fromPath = $config["fromPath"];
-        $this->toPath   = $config["toPath"];
+        $this->toPath   = $config["toPath"] ?: [$this->fromPath];
+        $this->toPath   = is_array($this->toPath) ? $this->toPath : [$this->toPath];
 
         $this->fn = fopen("php://memory", "wb");
 
-        if (!is_dir($this->getFromPath())) {
+        if (!is_dir($this->fromPath)) {
             throw new Exception("Defined `fromPath` is not valid");
         }
 
-        if ($this->getToPath() && !is_dir($this->getToPath())) {
-            throw new Exception("Defined `toPath` is not valid");
+        foreach ($this->toPath as $path) {
+            if (!is_dir($path)) {
+                throw new Exception("Defined `toPath` is not valid");
+            }
         }
 
         fputs($this->fn, "[");
@@ -84,10 +87,10 @@ class ClassAnalyzer
     public function analyze()
     {
         $this->getClassAndPath($this->getFromPath(), $this->collectedClass);
-        $this->analyzeContainClass($this->getFromPath(), $this->collectedClass);
+        $this->analyzeContainClass($this->getFromPath());
 
-        if ($this->getToPath()) {
-            $this->analyzeContainClass($this->getToPath(), $this->collectedClass);
+        foreach ($this->getToPath() as $path) {
+            $this->analyzeContainClass($path);
         }
 
         foreach ($this->unused as $class => $method) {
@@ -164,6 +167,10 @@ class ClassAnalyzer
         return $this->lines;
     }
 
+    /**
+     * 取得總數量
+     * @return int
+     */
     public function getTotal()
     {
         foreach ($this->collectedClass as $map) {
@@ -183,12 +190,12 @@ class ClassAnalyzer
      * @param  array  $resource       folderB的class資料
      * @return void
      */
-    private function analyzeContainClass($dir, $matchClassPath, array &$resource = [])
+    private function analyzeContainClass($dir, array &$resource = [])
     {
-        $this->iterDir("{$dir}/*", function ($filePath) use ($matchClassPath, &$resource) {
-            $this->analyzeContent($filePath, $matchClassPath, $resource);
-        }, function ($filePath) use ($matchClassPath, &$resource) {
-            $this->analyzeContainClass($filePath, $matchClassPath, $resource);
+        $this->iterDir("{$dir}/*", function ($filePath) use (&$resource) {
+            $this->analyzeContent($filePath, $resource);
+        }, function ($filePath) use (&$resource) {
+            $this->analyzeContainClass($filePath, $resource);
         });
     }
 
@@ -199,7 +206,7 @@ class ClassAnalyzer
      * @param  array   $resource       folderB的class資料
      * @return void
      */
-    private function analyzeContent($filePath, array $matchClassPath, array &$resource)
+    private function analyzeContent($filePath, array &$resource)
     {
         $fn          = $this->fn;
         $analyzer    = new CodeAnalyzer($filePath);
@@ -207,7 +214,7 @@ class ClassAnalyzer
         $code        = $analyzer->getCode();
         $lines       = $analyzer->getLines();
         $this->lines = array_merge($lines, $this->lines);
-        foreach ($matchClassPath as $fromPath => $matchClass) {
+        foreach ($this->collectedClass as $fromPath => $matchClass) {
             foreach ($matchClass as $matched) {
                 $pattern        = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
                 $regexUse       = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";

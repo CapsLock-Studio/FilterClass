@@ -59,7 +59,7 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $filter->setBasePath(__DIR__);
         $this->assertEquals($filter->getBasePath(), __DIR__);
         $this->assertEquals($filter->getFromPath(), __DIR__);
-        $this->assertEquals($filter->getToPath(), __DIR__);
+        $this->assertEquals($filter->getToPath(), [__DIR__]);
     }
 
     public function testShowOutputAfterCreatedFlag()
