@@ -17,14 +17,7 @@ The second folder we called `folderB` which you want to analyze.
 
 ## Install package from Composer
 ```sh
-composer require "capslock-studio/filter-class"
-```
-
-## You can clone this package independently
-```sh
-git clone https://github.com/CapsLock-Studio/FilterClass.git
-
-composer install
+composer require global "capslock-studio/filter-class"
 ```
 
 ## Usage
