@@ -55,7 +55,7 @@ class Class_ extends Visitor
 
             $fullname = "{$this->namespace}\\{$classname}";
 
-            $this->lines[$fullname] = $this->lines[$fullname] ?: [];
+            $this->lines[$fullname] = isset($this->lines[$fullname]) ? $this->lines[$fullname] : [];
             $this->lines[$fullname][$node->name] = $lines;
 
             $this->code = array_merge_recursive($this->code, $code);

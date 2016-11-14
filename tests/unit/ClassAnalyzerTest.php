@@ -103,6 +103,8 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $filterNotShowResult->setShowOutputAfterCreatedFlag(false);
         $filterNotShowResult->analyze();
         $unused = $filterNotShowResult->getUnusedCode();
+        $lines  = $filterNotShowResult->getLines();
+        $total  = $filterNotShowResult->getTotal();
         unset($filterNotShowResult);
         $result2 = ob_get_clean();
 
@@ -111,12 +113,19 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $this->assertTrue(in_array("testNotUsedInNestedNamespace", $unused["Foo\Bar\Bar"]));
         $this->assertTrue(in_array("testNotUsed", $unused["Foo\Bar"]));
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\Bar"]));
+        $this->assertEquals($lines["Foo\Bar"]["testIsUsed"], 2);
         $this->assertFalse(in_array("testUseInBar2", $unused["Foo\Bar"]));
+        $this->assertEquals($lines["Foo\Bar"]["testUseInBar2"], 2);
         $this->assertFalse(in_array("testOneLineFunction", $unused["Foo\Bar"]));
+        $this->assertEquals($lines["Foo\Bar"]["testOneLineFunction"], 2);
         $this->assertFalse(in_array("testParentUsed", $unused["Foo\Bar"]));
+        $this->assertEquals($lines["Foo\Bar"]["testParentUsed"], 2);
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar1"]));
+        $this->assertEquals($lines["Foo\PHP7\Bar1"]["testIsUsed"], 2);
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar"]));
+        $this->assertEquals($lines["Foo\PHP7\Bar"]["testIsUsed"], 2);
         $this->assertNotEmpty($result1);
         $this->assertEmpty($result2);
+        $this->assertEquals($total, 49);
     }
 }
