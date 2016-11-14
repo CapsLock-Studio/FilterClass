@@ -1,7 +1,7 @@
 {
     "name": "capslock-studio/filter-class",
     "type": "library",
-    "description": "Reliable way to find out functions you do not use.",
+    "description": "Reliable way to find out functions you do not use with PHP.",
     "authors": [
         {
             "name": "michael34435",
