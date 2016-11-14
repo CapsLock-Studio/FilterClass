@@ -1,7 +1,7 @@
 {
     "name": "capslock-studio/filter-class",
     "type": "library",
-    "description": "A tool to analyze functions usage in folders",
+    "description": "Reliable way to find out functions you do not use.",
     "authors": [
         {
             "name": "michael34435",
