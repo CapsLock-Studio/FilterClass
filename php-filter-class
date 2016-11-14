@@ -65,7 +65,6 @@ foreach ($processed as $class => $methods) {
 }
 
 if ($deadCode) {
-    $total /= count($toFolder);
     echo "-----------------------------------", PHP_EOL;
     echo "Dead code hit report(estimate):", PHP_EOL, PHP_EOL;
     echo "dead code lines: {$dead}", PHP_EOL;
