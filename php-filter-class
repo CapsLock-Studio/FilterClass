@@ -40,23 +40,21 @@ foreach ($toFolder as $folder) {
     }
 }
 
-if ($unused) {
-    $processed = [];
-    foreach ($unused as $code) {
-        foreach ($code as $class => $method) {
-            $processed[$class] = isset($processed[$class]) ? $processed[$class] : $method;
-            $processed[$class] = array_intersect($processed[$class], $method);
-        }
+$processed = [];
+foreach ($unused as $code) {
+    foreach ($code as $class => $method) {
+        $processed[$class] = isset($processed[$class]) ? $processed[$class] : $method;
+        $processed[$class] = array_intersect($processed[$class], $method);
     }
+}
 
-    foreach ($processed as $class => $methods) {
-        if ($methods) {
-            echo "{$class}:", PHP_EOL;
-            foreach ($methods as $method) {
-                echo "\t{$method}", PHP_EOL;
-            }
-
-            echo PHP_EOL;
+foreach ($processed as $class => $methods) {
+    if ($methods) {
+        echo "{$class}:", PHP_EOL;
+        foreach ($methods as $method) {
+            echo "\t{$method}", PHP_EOL;
         }
+
+        echo PHP_EOL;
     }
 }
