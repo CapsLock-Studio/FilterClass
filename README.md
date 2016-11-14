@@ -15,14 +15,14 @@ You have to assign two folders.
 The first folder we called `folderA` that it is your based folder.  
 The second folder we called `folderB` which you want to analyze.  
 
-## Install package from Composer
+## Installation
 ```sh
-composer require global "capslock-studio/filter-class"
+composer global require "capslock-studio/filter-class"
 ```
 
 ## Usage
 ```sh
-./bin/analyze [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
+php-filter-class [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
 
 -f          folderA
 -t          folderB

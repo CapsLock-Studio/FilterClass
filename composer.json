@@ -12,7 +12,7 @@
         "nikic/php-parser": "^2.1"
     },
     "bin": [
-        "bin/analyze"
+        "php-filter-class"
     ],
     "license" : "MIT",
     "prefer-stable": true,

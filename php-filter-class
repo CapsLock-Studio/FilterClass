@@ -1,6 +1,12 @@
 #!/usr/bin/php
 <?php
 
+if (file_exists(__DIR__.'/../../autoload.php')) {
+    require __DIR__.'/../../autoload.php';
+} else {
+    require __DIR__.'/vendor/autoload.php';
+}
+
 $default           = ["f" => "", "t" => "", "dead-code" => false];
 $opts              = getopt("f:t:", ["dead-code"]);
 $opts["dead-code"] = isset($opts["dead-code"]) ? true : false;
@@ -15,8 +21,6 @@ $toFolder = is_string($toFolder) ? [$toFolder] : $toFolder;
 if (!file_exists($fromFolder)) {
     $fromFolder = getcwd();
 }
-
-require __DIR__ . "/../vendor/autoload.php";
 
 $unused = [];
 
