@@ -10,6 +10,8 @@ use CapsLockStudio\FilterClass\Visitor;
 class Class_ extends Visitor
 {
 
+    private $lines = [];
+
     public function leaveNode(Node $node)
     {
         $printer = $this->getPrinter();
@@ -43,8 +45,18 @@ class Class_ extends Visitor
 
             // TODO: handle private function
 
+            // handle lines
+            $lines = explode(PHP_EOL, $code);
+            $lines = count($lines) - 1;
+            $lines = $lines <= 0 ? 0 : $lines;
+
             // get used code
             $code = $methodVisitor->getCode();
+
+            $fullname = "{$this->namespace}\\{$classname}";
+
+            $this->lines[$fullname] = $this->lines[$fullname] ?: [];
+            $this->lines[$fullname][$node->name] = $lines;
 
             $this->code = array_merge_recursive($this->code, $code);
         }
@@ -53,5 +65,10 @@ class Class_ extends Visitor
     public function getCode()
     {
         return $this->code;
+    }
+
+    public function getLines()
+    {
+        return $this->lines;
     }
 }

@@ -2,10 +2,6 @@
 
 namespace CapsLockStudio\FilterClass;
 
-use PhpParser\ParserFactory;
-use PhpParser\NodeTraverser;
-use CapsLockStudio\FilterClass\Visitor\Class_;
-
 /**
  * @author michael34435 <michael34435@capslock.tw>
  *
@@ -21,14 +17,18 @@ class ClassAnalyzer
         "function"  => "/(private|protected|public)*\s*(static)*\s*function\s+([A-Za-z0-9_]+)/",
     ];
 
-    private $fn       = null;
-    private $fromPath = "";
-    private $toPath   = "";
-    private $basePath = "";
-    private $show     = false;
-    private $report   = "";
-    private $unused   = [];
-    private $used     = [];
+    private $fn             = null;
+    private $fromPath       = "";
+    private $toPath         = "";
+    private $basePath       = "";
+    private $show           = false;
+    private $report         = "";
+    private $unused         = [];
+    private $used           = [];
+    private $lines          = [];
+    private $mapping        = [];
+    private $total          = 0;
+    private $collectedClass = [];
 
     /**
      * 建構子
@@ -41,7 +41,7 @@ class ClassAnalyzer
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
 
-        $this->setResultResource();
+        $this->fn = fopen("php://memory", "wb");
 
         if (!is_dir($this->getFromPath())) {
             throw new Exception("Defined `fromPath` is not valid");
@@ -68,7 +68,7 @@ class ClassAnalyzer
      */
     public function __destruct()
     {
-        $fn = $this->getResultResource();
+        $fn = $this->fn;
         if ($this->getShowOutputAfterCreatedFlag()) {
             rewind($fn);
             echo stream_get_contents($fn);
@@ -83,12 +83,11 @@ class ClassAnalyzer
      */
     public function analyze()
     {
-        $collectedClass = [];
-        $this->getClassAndPath($this->getFromPath(), $collectedClass);
-        $this->analyzeContainClass($this->getFromPath(), $collectedClass);
+        $this->getClassAndPath($this->getFromPath(), $this->collectedClass);
+        $this->analyzeContainClass($this->getFromPath(), $this->collectedClass);
 
         if ($this->getToPath()) {
-            $this->analyzeContainClass($this->getToPath(), $collectedClass);
+            $this->analyzeContainClass($this->getToPath(), $this->collectedClass);
         }
 
         foreach ($this->unused as $class => $method) {
@@ -97,7 +96,7 @@ class ClassAnalyzer
             }
         }
 
-        fputs($this->getResultResource(), "]");
+        fputs($this->fn, "]");
     }
 
     /**
@@ -156,6 +155,28 @@ class ClassAnalyzer
     }
 
     /**
+     * 取得行數比
+     *
+     * @return array
+     */
+    public function getLines()
+    {
+        return $this->lines;
+    }
+
+    public function getTotal()
+    {
+        foreach ($this->collectedClass as $map) {
+            foreach ($map as $data) {
+                $pattern      = "{$data["namespace"]}\\{$data["class"]}";
+                $this->total += isset($this->lines[$pattern]) ? array_sum($this->lines[$pattern]) : 0;
+            }
+        }
+
+        return $this->total;
+    }
+
+    /**
      * 分析folderB含有的class
      * @param  string $dir            來源資料夾
      * @param  array  $matchClassPath folderA的class資料
@@ -165,8 +186,7 @@ class ClassAnalyzer
     private function analyzeContainClass($dir, $matchClassPath, array &$resource = [])
     {
         $this->iterDir("{$dir}/*", function ($filePath) use ($matchClassPath, &$resource) {
-            $fileContent = php_strip_whitespace($filePath);
-            $this->analyzeContent($fileContent, $matchClassPath, $resource, $filePath);
+            $this->analyzeContent($filePath, $matchClassPath, $resource);
         }, function ($filePath) use ($matchClassPath, &$resource) {
             $this->analyzeContainClass($filePath, $matchClassPath, $resource);
         });
@@ -174,16 +194,19 @@ class ClassAnalyzer
 
     /**
      * 分析內容
-     * @param  string  $fileContent    檔案內容
+     * @param  string  $filePath    檔案內容
      * @param  array   $matchClassPath folderA的class資料
      * @param  array   $resource       folderB的class資料
-     * @param  string  $filePath       目前分析的資料
      * @return void
      */
-    private function analyzeContent($fileContent, array $matchClassPath, array &$resource, $filePath)
+    private function analyzeContent($filePath, array $matchClassPath, array &$resource)
     {
-        $fn   = $this->getResultResource();
-        $code = $this->getCode($filePath);
+        $fn          = $this->fn;
+        $analyzer    = new CodeAnalyzer($filePath);
+        $fileContent = $analyzer->getTrimedCode();
+        $code        = $analyzer->getCode();
+        $lines       = $analyzer->getLines();
+        $this->lines = array_merge($lines, $this->lines);
         foreach ($matchClassPath as $fromPath => $matchClass) {
             foreach ($matchClass as $matched) {
                 $pattern        = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
@@ -279,25 +302,7 @@ class ClassAnalyzer
      */
     private function getClassAndNamespaceFromFilePath($path)
     {
-        $fileStr     = file_get_contents($path);
-        $fileContent = "";
-
-        $commentTokens   = [T_COMMENT];
-        $commentTokens[] = defined('T_DOC_COMMENT') ? T_DOC_COMMENT : T_ML_COMMENT;
-
-        $tokens = token_get_all($fileStr);
-
-        foreach ($tokens as $token) {
-            if (is_array($token)) {
-                if (in_array($token[0], $commentTokens))
-                    continue;
-
-                $token = $token[1];
-            }
-
-            $fileContent .= $token;
-        }
-
+        $fileContent = (new CodeAnalyzer($path))->getTrimedCode();
         if (preg_match(self::REGEX["class"], $fileContent, $match)) {
             preg_match(self::REGEX["namespace"], $fileContent, $namespace);
             preg_match_all(self::REGEX["function"], $fileContent, $functions);
@@ -338,47 +343,5 @@ class ClassAnalyzer
                 $cb2($filePath);
             }
         }
-    }
-
-    private function getCode($path)
-    {
-        $code = [];
-
-        // parser created
-        $traverser = new NodeTraverser();
-        $parser    = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
-        $content   = php_strip_whitespace($path);
-        if (preg_match(self::REGEX["extends"], $content, $match)) {
-            // visitor class method
-            $classVisitor = new Class_();
-            $traverser->addVisitor($classVisitor);
-
-            // parse it
-            $stmts = $parser->parse($content);
-            $traverser->traverse($stmts);
-
-            // 取得所有「使用到」的class method
-            $code = $classVisitor->getCode();
-        }
-
-        return $code;
-    }
-
-    /**
-     * 取得目前正在處理的檔案
-     * @return resource
-     */
-    private function setResultResource()
-    {
-        $this->fn = fopen("php://memory", "wb");
-    }
-
-    /**
-     * 取得目前正在處理的檔案
-     * @return resource
-     */
-    private function getResultResource()
-    {
-        return $this->fn;
     }
 }

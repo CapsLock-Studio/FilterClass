@@ -31,7 +31,7 @@ class Visitor extends NodeVisitorAbstract
         }
 
         if ($node instanceof Node\Stmt\Namespace_) {
-            $this->namespace = $node->name;
+            $this->namespace = implode("\\", $node->name->parts);
         }
 
         if ($node instanceof Node\Stmt\Use_ || $node instanceof Node\Stmt\GroupUse) {

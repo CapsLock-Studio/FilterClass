@@ -22,7 +22,11 @@ if (!file_exists($fromFolder)) {
     $fromFolder = getcwd();
 }
 
+$used   = [];
 $unused = [];
+$lines  = [];
+$total  = 0;
+$dead   = 0;
 
 foreach ($toFolder as $folder) {
     $filter = new CapsLockStudio\FilterClass\ClassAnalyzer([
@@ -34,6 +38,8 @@ foreach ($toFolder as $folder) {
 
     if ($deadCode) {
         $unused[] = $filter->getUnusedCode();
+        $total   += $filter->getTotal();
+        $lines    = array_merge($lines, $filter->getLines());
         $filter->setShowOutputAfterCreatedFlag(false);
     } else {
         $filter->setShowOutputAfterCreatedFlag(true);
@@ -53,8 +59,18 @@ foreach ($processed as $class => $methods) {
         echo "{$class}:", PHP_EOL;
         foreach ($methods as $method) {
             echo "\t{$method}", PHP_EOL;
+            $dead += $lines[$class][$method];
         }
 
         echo PHP_EOL;
     }
+}
+
+if ($deadCode) {
+    $total /= count($toFolder);
+    echo "-----------------------------------", PHP_EOL;
+    echo "Dead code hit report(estimate):", PHP_EOL, PHP_EOL;
+    echo "dead code lines: {$dead}", PHP_EOL;
+    echo "total lines: {$total}", PHP_EOL;
+    echo "dead code percentage: " . (sprintf("%.2f", $dead / $total * 100)) . "%", PHP_EOL;
 }
