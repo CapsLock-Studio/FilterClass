@@ -297,8 +297,6 @@ class ClassAnalyzer
      *
      * @param string $path 路徑
      * @return array
-     *
-     * @see http://stackoverflow.com/questions/503871/best-way-to-automatically-remove-comments-from-php-code
      */
     private function getClassAndNamespaceFromFilePath($path)
     {

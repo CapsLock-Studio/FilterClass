@@ -51,6 +51,7 @@ class CodeAnalyzer
      * @param string $path PATH
      *
      * @return string
+     * @see http://stackoverflow.com/questions/503871/best-way-to-automatically-remove-comments-from-php-code
      */
     public function getTrimedCode()
     {
