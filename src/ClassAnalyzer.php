@@ -216,16 +216,17 @@ class ClassAnalyzer
         $this->lines = array_merge($lines, $this->lines);
         foreach ($this->collectedClass as $fromPath => $matchClass) {
             foreach ($matchClass as $matched) {
-                $pattern        = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
-                $regexUse       = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
-                $regexGroupUse  = "/" . quotemeta($matched["namespace"]) . "\\\{([A-Za-z0-9_, ]+)\}/";
-                $groupUseMatch  = preg_match_all($regexGroupUse, $fileContent, $matchedGroupUse);
-                $extendsMatch   = @preg_match(self::REGEX["extends"], $fileContent, $matchedExtends);
+                $pattern      = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
+                $regexUse      = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
+                $regexGroupUse = "/" . quotemeta($matched["namespace"]) . "\\\{([A-Za-z0-9_, ]+)\}/";
+                
+                preg_match_all($regexGroupUse, $fileContent, $matchedGroupUse);
+                @preg_match(self::REGEX["extends"], $fileContent, $matchedExtends);
+                
                 $classFound     = @preg_match($regexUse, $fileContent, $matchedUse);
                 $matchUseClass  = isset($matchedUse[2]) ? $matchedUse[2] : $matched["class"];
                 $matchedExtends = isset($matchedExtends[3]) ? $matchedExtends[3] : null;
                 $groupUseFound  = false;
-
                 foreach ($matchedGroupUse[1] as $groupMatch) {
                     $groupMatch = explode(",", $groupMatch);
                     foreach ($groupMatch as $group) {
