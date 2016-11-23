@@ -91,7 +91,8 @@ class ClassAnalyzer
             $this->analyzeContainClass($path);
         }
 
-        foreach ($this->unused as $class => $method) {
+        $unusedClass = array_keys($this->unused);
+        foreach ($unusedClass as $class) {
             if (isset($this->used[$class])) {
                 $this->unused[$class] = array_diff($this->unused[$class], $this->used[$class]);
             }
