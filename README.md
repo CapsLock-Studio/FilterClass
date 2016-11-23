@@ -28,9 +28,8 @@ ln -s $HOME/.composer/vendor/bin/php-filter-class /usr/local/bin/php-filter-clas
 ```sh
 php-filter-class [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
 
--f          folderA
--t          folderB
---dead-code Functions you do not use
+-f    folderA
+-t    folderB
 ```
 
 ## Limitation(Knowing Issue)
