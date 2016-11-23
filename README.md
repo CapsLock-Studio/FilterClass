@@ -18,6 +18,8 @@ The second folder we called `folderB` which you want to analyze.
 ## Composer
 ```sh
 composer global require "capslock-studio/filter-class"
+
+ln -s $HOME/.composer/vendor/bin/php-filter-class /usr/local/bin/php-filter-class
 ```
 
 ## Usage

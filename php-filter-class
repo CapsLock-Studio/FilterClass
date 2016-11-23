@@ -28,22 +28,20 @@ $lines  = [];
 $total  = 0;
 $dead   = 0;
 
-foreach ($toFolder as $folder) {
-    $filter = new CapsLockStudio\FilterClass\ClassAnalyzer([
-        "fromPath" => $fromFolder,
-        "toPath"   => $folder,
-    ]);
+$filter = new CapsLockStudio\FilterClass\ClassAnalyzer([
+    "fromPath" => $fromFolder,
+    "toPath"   => $folder,
+]);
 
-    $filter->analyze();
+$filter->analyze();
 
-    if ($deadCode) {
-        $unused[] = $filter->getUnusedCode();
-        $total   += $filter->getTotal();
-        $lines    = array_merge($lines, $filter->getLines());
-        $filter->setShowOutputAfterCreatedFlag(false);
-    } else {
-        $filter->setShowOutputAfterCreatedFlag(true);
-    }
+if ($deadCode) {
+    $unused[] = $filter->getUnusedCode();
+    $total   += $filter->getTotal();
+    $lines    = array_merge($lines, $filter->getLines());
+    $filter->setShowOutputAfterCreatedFlag(false);
+} else {
+    $filter->setShowOutputAfterCreatedFlag(true);
 }
 
 $processed = [];
@@ -67,7 +65,6 @@ foreach ($processed as $class => $methods) {
 }
 
 if ($deadCode) {
-    $total /= count($toFolder);
     echo "-----------------------------------", PHP_EOL;
     echo "Dead code hit report(estimate):", PHP_EOL, PHP_EOL;
     echo "dead code lines: {$dead}", PHP_EOL;
