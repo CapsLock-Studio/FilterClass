@@ -19,7 +19,7 @@ class CodeAnalyzer
         $traverser  = new NodeTraverser();
         $parser     = (new ParserFactory)->create(ParserFactory::PREFER_PHP5);
         $content    = $this->getTrimedCode();
-        if (preg_match(ClassAnalyzer::REGEX["extends"], $content, $match)) {
+        if (preg_match(ClassAnalyzer::REGEX["extends"], $content)) {
             // visitor class method
             $classVisitor = new Class_();
             $traverser->addVisitor($classVisitor);

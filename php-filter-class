@@ -7,20 +7,12 @@ if (file_exists(__DIR__.'/../../autoload.php')) {
     require __DIR__.'/vendor/autoload.php';
 }
 
-$default           = ["f" => "", "t" => "", "dead-code" => false];
-$opts              = getopt("f:t:", ["dead-code"]);
-$opts["dead-code"] = isset($opts["dead-code"]) ? true : false;
-$opts              = array_merge($default, $opts);
+$default = ["f" => getcwd(), "t" => getcwd()];
+$opts    = getopt("f:t:");
+$opts    = array_merge($default, $opts);
 
 $fromFolder = $opts["f"];
 $toFolder   = $opts["t"];
-$deadCode   = $opts["dead-code"];
-
-$toFolder = is_string($toFolder) ? [$toFolder] : $toFolder;
-
-if (!file_exists($fromFolder)) {
-    $fromFolder = getcwd();
-}
 
 $used   = [];
 $unused = [];
@@ -30,26 +22,19 @@ $dead   = 0;
 
 $filter = new CapsLockStudio\FilterClass\ClassAnalyzer([
     "fromPath" => $fromFolder,
-    "toPath"   => $folder,
+    "toPath"   => $toFolder,
 ]);
 
 $filter->analyze();
 
-if ($deadCode) {
-    $unused[] = $filter->getUnusedCode();
-    $total   += $filter->getTotal();
-    $lines    = array_merge($lines, $filter->getLines());
-    $filter->setShowOutputAfterCreatedFlag(false);
-} else {
-    $filter->setShowOutputAfterCreatedFlag(true);
-}
+$unused = $filter->getUnusedCode();
+$total  = $filter->getTotal();
+$lines  = array_merge($lines, $filter->getLines());
 
 $processed = [];
-foreach ($unused as $code) {
-    foreach ($code as $class => $method) {
-        $processed[$class] = isset($processed[$class]) ? $processed[$class] : $method;
-        $processed[$class] = array_intersect($processed[$class], $method);
-    }
+foreach ($unused as $class => $method) {
+    $processed[$class] = isset($processed[$class]) ? $processed[$class] : $method;
+    $processed[$class] = array_intersect($processed[$class], $method);
 }
 
 foreach ($processed as $class => $methods) {
@@ -64,10 +49,8 @@ foreach ($processed as $class => $methods) {
     }
 }
 
-if ($deadCode) {
-    echo "-----------------------------------", PHP_EOL;
-    echo "Dead code hit report(estimate):", PHP_EOL, PHP_EOL;
-    echo "dead code lines: {$dead}", PHP_EOL;
-    echo "total lines: {$total}", PHP_EOL;
-    echo "dead code percentage: " . (sprintf("%.2f", $dead / $total * 100)) . "%", PHP_EOL;
-}
+echo "-----------------------------------", PHP_EOL;
+echo "Dead code hit report(estimate):", PHP_EOL, PHP_EOL;
+echo "dead code lines: {$dead}", PHP_EOL;
+echo "total lines: {$total}", PHP_EOL;
+echo "dead code percentage: " . (sprintf("%.2f", $dead / $total * 100)) . "%", PHP_EOL;

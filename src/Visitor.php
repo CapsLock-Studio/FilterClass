@@ -22,7 +22,6 @@ class Visitor extends NodeVisitorAbstract
 
     public function enterNode(Node $node)
     {
-        $printer = new PrettyPrinter\Standard;
         if ($node instanceof Node\Stmt\Class_) {
             $this->classname = $node->name;
             if (isset($node->extends)) {
