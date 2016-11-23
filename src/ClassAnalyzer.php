@@ -17,17 +17,15 @@ class ClassAnalyzer
         "function"  => "/(private|protected|public)*\s*(static)*\s*function\s+([A-Za-z0-9_]+)/",
     ];
 
-    private $fn             = null;
+    private $filePointer    = null;
     private $show           = false;
     private $fromPath       = "";
     private $toPath         = "";
     private $basePath       = "";
-    private $report         = "";
     private $total          = 0;
     private $unused         = [];
     private $used           = [];
     private $lines          = [];
-    private $mapping        = [];
     private $collectedClass = [];
 
     /**
@@ -42,7 +40,7 @@ class ClassAnalyzer
         $this->toPath   = $config["toPath"] ?: [$this->fromPath];
         $this->toPath   = is_array($this->toPath) ? $this->toPath : [$this->toPath];
 
-        $this->fn = fopen("php://memory", "wb");
+        $this->filePointer = fopen("php://memory", "wb");
 
         if (!is_dir($this->fromPath)) {
             throw new Exception("Defined `fromPath` is not valid");
@@ -54,7 +52,7 @@ class ClassAnalyzer
             }
         }
 
-        fputs($this->fn, "[");
+        fputs($this->filePointer, "[");
     }
 
     /**
@@ -71,13 +69,13 @@ class ClassAnalyzer
      */
     public function __destruct()
     {
-        $fn = $this->fn;
+        $filePointer = $this->filePointer;
         if ($this->getShowOutputAfterCreatedFlag()) {
-            rewind($fn);
-            echo stream_get_contents($fn);
+            rewind($filePointer);
+            echo stream_get_contents($filePointer);
         }
 
-        fclose($fn);
+        fclose($filePointer);
     }
 
     /**
@@ -99,7 +97,7 @@ class ClassAnalyzer
             }
         }
 
-        fputs($this->fn, "]");
+        fputs($this->filePointer, "]");
     }
 
     /**
@@ -208,7 +206,7 @@ class ClassAnalyzer
      */
     private function analyzeContent($filePath, array &$resource)
     {
-        $fn          = $this->fn;
+        $filePointer = $this->filePointer;
         $analyzer    = new CodeAnalyzer($filePath);
         $fileContent = $analyzer->getTrimedCode();
         $code        = $analyzer->getCode();
@@ -219,10 +217,10 @@ class ClassAnalyzer
                 $pattern      = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
                 $regexUse      = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
                 $regexGroupUse = "/" . quotemeta($matched["namespace"]) . "\\\{([A-Za-z0-9_, ]+)\}/";
-                
+
                 preg_match_all($regexGroupUse, $fileContent, $matchedGroupUse);
                 @preg_match(self::REGEX["extends"], $fileContent, $matchedExtends);
-                
+
                 $classFound     = @preg_match($regexUse, $fileContent, $matchedUse);
                 $matchUseClass  = isset($matchedUse[2]) ? $matchedUse[2] : $matched["class"];
                 $matchedExtends = isset($matchedExtends[3]) ? $matchedExtends[3] : null;
@@ -270,11 +268,11 @@ class ClassAnalyzer
                         $this->unused[$pattern] = $this->unused[$pattern] ? array_intersect($this->unused[$pattern], $unused) : $unused;
 
                         if ($resource) {
-                            fputs($fn, ",");
+                            fputs($filePointer, ",");
                         }
 
                         $resource[] = $keymap;
-                        fputs($fn, json_encode($content, JSON_PRETTY_PRINT));
+                        fputs($filePointer, json_encode($content, JSON_PRETTY_PRINT));
                     }
                 }
             }
