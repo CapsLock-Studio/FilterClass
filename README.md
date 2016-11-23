@@ -11,7 +11,7 @@ FilterClass
 
 Author: michael34435@capslock.tw
 
-This package will help you to analyze two folders and find out function you do not use.
+This package will help you to analyze two folders and find out function you do not use(DoD).
 
 You have to assign two folders.  
 The first folder we called `folderA` that it is your based folder.  
@@ -26,7 +26,7 @@ ln -s $HOME/.composer/vendor/bin/php-filter-class /usr/local/bin/php-filter-clas
 
 ## Usage
 ```sh
-php-filter-class [-t {folderB}] [-t {folderB-2}] [-f {folderA}] [--dead-code]
+php-filter-class [-t {folderB}] [-t {folderB-2}] [-f {folderA}]
 
 -f    folderA
 -t    folderB
