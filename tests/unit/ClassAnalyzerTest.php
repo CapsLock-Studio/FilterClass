@@ -56,57 +56,24 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
             "toPath"   => __DIR__,
         ]);
 
-        $filter->setBasePath(__DIR__);
-        $this->assertEquals($filter->getBasePath(), __DIR__);
-        $this->assertEquals($filter->getFromPath(), __DIR__);
-        $this->assertEquals($filter->getToPath(), [__DIR__]);
-    }
-
-    public function testShowOutputAfterCreatedFlag()
-    {
-        $filter = new ClassAnalyzer([
-            "fromPath" => __DIR__,
-            "toPath"   => __DIR__,
-        ]);
-
-        $filter->setShowOutputAfterCreatedFlag(true);
-        $flag = $filter->getShowOutputAfterCreatedFlag();
-        $this->assertTrue($flag);
-
-        $filter->setShowOutputAfterCreatedFlag(false);
-        $flag = $filter->getShowOutputAfterCreatedFlag();
-        $this->assertFalse($flag);
+        $filter->basePath = __DIR__;
+        $this->assertEquals($filter->basePath, __DIR__);
+        $this->assertEquals($filter->fromPath, __DIR__);
+        $this->assertEquals($filter->toPath, [__DIR__]);
     }
 
     public function testAnalyze()
     {
         $path   = __DIR__ . "/../_data/Foo";
-        $filterShowResult = new ClassAnalyzer([
+        $filterResult = new ClassAnalyzer([
             "fromPath" => $path,
             "toPath"   => $path,
         ]);
 
-        ob_start();
-        $filterShowResult->setShowOutputAfterCreatedFlag(true);
-        $filterShowResult->analyze();
-        $unused = $filterShowResult->getUnusedCode();
-        unset($filterShowResult);
-
-        $result1 = ob_get_clean();
-
-        $filterNotShowResult = new ClassAnalyzer([
-            "fromPath" => $path,
-            "toPath"   => $path,
-        ]);
-
-        ob_start();
-        $filterNotShowResult->setShowOutputAfterCreatedFlag(false);
-        $filterNotShowResult->analyze();
-        $unused = $filterNotShowResult->getUnusedCode();
-        $lines  = $filterNotShowResult->getLines();
-        $total  = $filterNotShowResult->getTotal();
-        unset($filterNotShowResult);
-        $result2 = ob_get_clean();
+        $filterResult->analyze();
+        $unused = $filterResult->getUnusedCode();
+        $lines  = $filterResult->getLines();
+        $total  = $filterResult->getTotal();
 
         $this->assertTrue(isset($unused["Foo\Bar"]));
         $this->assertTrue(isset($unused["Foo\Bar1"]));
@@ -124,8 +91,6 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $this->assertEquals($lines["Foo\PHP7\Bar1"]["testIsUsed"], 2);
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar"]));
         $this->assertEquals($lines["Foo\PHP7\Bar"]["testIsUsed"], 2);
-        $this->assertNotEmpty($result1);
-        $this->assertEmpty($result2);
         $this->assertEquals($total, 49);
     }
 }

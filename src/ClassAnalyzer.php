@@ -17,16 +17,16 @@ class ClassAnalyzer
         "function"  => "/(private|protected|public)*\s*(static)*\s*function\s+([A-Za-z0-9_]+)/",
     ];
 
-    private $filePointer    = null;
-    private $show           = false;
-    private $fromPath       = "";
-    private $toPath         = "";
-    private $basePath       = "";
-    private $total          = 0;
     private $unused         = [];
     private $used           = [];
     private $lines          = [];
     private $collectedClass = [];
+    private $magic          = [
+        "toPath"   => [],
+        "fromPath" => "",
+        "basePath" => "",
+        "total"    => 0,
+    ];
 
     /**
      * 建構子
@@ -37,10 +37,7 @@ class ClassAnalyzer
         $templateConfig = ["fromPath" => "", "toPath" => ""];
         $config         = array_merge($templateConfig, $config);
         $this->fromPath = $config["fromPath"];
-        $this->toPath   = $config["toPath"] ?: [$this->fromPath];
-        $this->toPath   = is_array($this->toPath) ? $this->toPath : [$this->toPath];
-
-        $this->filePointer = fopen("php://memory", "wb");
+        $this->toPath   = $config["toPath"];
 
         if (!is_dir($this->fromPath)) {
             throw new Exception("Defined `fromPath` is not valid");
@@ -51,31 +48,6 @@ class ClassAnalyzer
                 throw new Exception("Defined `toPath` is not valid");
             }
         }
-
-        fputs($this->filePointer, "[");
-    }
-
-    /**
-     * 設定母目錄
-     * @param string $basePath
-     */
-    public function setBasePath($basePath)
-    {
-        $this->basePath = $basePath;
-    }
-
-    /**
-     * 結束後會做的動作
-     */
-    public function __destruct()
-    {
-        $filePointer = $this->filePointer;
-        if ($this->getShowOutputAfterCreatedFlag()) {
-            rewind($filePointer);
-            echo stream_get_contents($filePointer);
-        }
-
-        fclose($filePointer);
     }
 
     /**
@@ -84,10 +56,10 @@ class ClassAnalyzer
      */
     public function analyze()
     {
-        $this->getClassAndPath($this->getFromPath(), $this->collectedClass);
-        $this->analyzeContainClass($this->getFromPath());
+        $this->getClassAndPath($this->fromPath, $this->collectedClass);
+        $this->analyzeContainClass($this->fromPath);
 
-        foreach ($this->getToPath() as $path) {
+        foreach ($this->toPath as $path) {
             $this->analyzeContainClass($path);
         }
 
@@ -97,53 +69,34 @@ class ClassAnalyzer
                 $this->unused[$class] = array_diff($this->unused[$class], $this->used[$class]);
             }
         }
-
-        fputs($this->filePointer, "]");
     }
 
     /**
-     * 取得母目錄
-     * @return string
+     * magic function __get
+     * @param string $name key
+     * @return mixed
      */
-    public function getBasePath()
+    public function __get($name)
     {
-        return $this->basePath;
+        return array_key_exists($name, $this->magic) ? $this->magic[$name] : false;
     }
 
     /**
-     * 取得folderA
-     * @return string
+     * magic function ref: $this->magic
+     * @param string $name  key
+     * @param mixed  $value value
      */
-    public function getFromPath()
+    public function __set($name, $value)
     {
-        return $this->fromPath;
-    }
-
-    /**
-     * 設定結束後是否顯示
-     *
-     * @param boolean
-     */
-    public function setShowOutputAfterCreatedFlag($show)
-    {
-        $this->show = is_bool($show) ? $show : $this->show;
-    }
-
-    /**
-     * 取得設定後是否顯示的flag
-     */
-    public function getShowOutputAfterCreatedFlag()
-    {
-        return $this->show;
-    }
-
-    /**
-     * 取得folderB
-     * @return string
-     */
-    public function getToPath()
-    {
-        return $this->toPath;
+        if (array_key_exists($name, $this->magic)) {
+            $type = gettype($this->magic[$name]);
+            if ($type === "array") {
+                $value              = is_array($value) ? $value : [$value];
+                $this->magic[$name] = array_merge($this->magic[$name], $value);
+            } else {
+                $this->magic[$name] = $value;
+            }
+        }
     }
 
     /**
@@ -207,7 +160,6 @@ class ClassAnalyzer
      */
     private function analyzeContent($filePath, array &$resource)
     {
-        $filePointer = $this->filePointer;
         $analyzer    = new CodeAnalyzer($filePath);
         $fileContent = $analyzer->getTrimedCode();
         $code        = $analyzer->getCode();
@@ -215,7 +167,7 @@ class ClassAnalyzer
         $this->lines = array_merge($lines, $this->lines);
         foreach ($this->collectedClass as $fromPath => $matchClass) {
             foreach ($matchClass as $matched) {
-                $pattern      = !empty($matched["namespace"]) ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
+                $pattern       = $matched["namespace"] ? "{$matched["namespace"]}\\{$matched["class"]}" : $matched["class"];
                 $regexUse      = "/" . quotemeta($pattern) . "\s*(\s+as\s+(.+);|;|,|\()/";
                 $regexGroupUse = "/" . quotemeta($matched["namespace"]) . "\\\{([A-Za-z0-9_, ]+)\}/";
 
@@ -225,56 +177,26 @@ class ClassAnalyzer
                 $classFound     = @preg_match($regexUse, $fileContent, $matchedUse);
                 $matchUseClass  = isset($matchedUse[2]) ? $matchedUse[2] : $matched["class"];
                 $matchedExtends = isset($matchedExtends[3]) ? $matchedExtends[3] : null;
-                $groupUseFound  = false;
-                foreach ($matchedGroupUse[1] as $groupMatch) {
-                    $groupMatch = explode(",", $groupMatch);
-                    foreach ($groupMatch as $group) {
-                        $group = trim($group);
-                        if ($group == $matched["class"]) {
-                            $groupUseFound = true;
-                        }
-                    }
-                }
+                $groupUseFound  = $this->isGroupMatched($matchedGroupUse[1], $matched["class"]);
 
-                if ($classFound || $filePath === $matched["path"] || $matchedExtends === $matchUseClass || $groupUseFound) {
-                    if ($groupUseFound) {
-                        $used = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
-                    }
+                $condition = $classFound || $filePath === $matched["path"] || $matchedExtends === $matchUseClass || $groupUseFound;
 
-                    $fromPath = str_replace($this->getBasePath(), "", $fromPath);
-                    $filePath = str_replace($this->getBasePath(), "", $filePath);
-                    $keymap   = [
-                        "in"      => $filePath,
-                        "from"    => $fromPath,
-                        "pattern" => $pattern
-                    ];
+                $fromPath = str_replace($this->basePath, "", $fromPath);
+                $filePath = str_replace($this->basePath, "", $filePath);
+                $keymap   = [
+                    "in"      => $filePath,
+                    "from"    => $fromPath,
+                    "pattern" => $pattern
+                ];
 
-                    if (!in_array($keymap, $resource)) {
-                        $this->used = array_merge_recursive($code, $this->used);
-                        $used    = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
-                        $methods = isset($code[$pattern]) ? $code[$pattern] : [];
-                        $methods = array_unique($methods);
-                        sort($methods);
+                if ($condition && !in_array($keymap, $resource)) {
+                    $this->used = array_merge_recursive($code, $this->used);
+                    $used       = isset($this->used[$pattern]) ? $this->used[$pattern] : [];
+                    $unused     = array_diff($matched["functions"], $used);
+                    $this->unused[$pattern] = isset($this->unused[$pattern]) ? $this->unused[$pattern] : [];
+                    $this->unused[$pattern] = $this->unused[$pattern] ? array_intersect($this->unused[$pattern], $unused) : $unused;
 
-                        $content = [];
-                        $content["pattern"]   = $pattern;
-                        $content["match"]     = $matched["class"];
-                        $content["path"]      = $filePath;
-                        $content["found"]     = $fromPath;
-                        $content["namespace"] = $matched["namespace"];
-                        $content["method"]    = $methods;
-
-                        $unused = array_diff($matched["functions"], $used);
-                        $this->unused[$pattern] = isset($this->unused[$pattern]) ? $this->unused[$pattern] : [];
-                        $this->unused[$pattern] = $this->unused[$pattern] ? array_intersect($this->unused[$pattern], $unused) : $unused;
-
-                        if ($resource) {
-                            fputs($filePointer, ",");
-                        }
-
-                        $resource[] = $keymap;
-                        fputs($filePointer, json_encode($content, JSON_PRETTY_PRINT));
-                    }
+                    $resource[] = $keymap;
                 }
             }
         }
@@ -348,5 +270,24 @@ class ClassAnalyzer
                 $cb2($filePath);
             }
         }
+    }
+
+    /**
+     * PHP7 group
+     * @param array  $matchedGroupUse GROUP USE
+     * @param string $class           使用到的class
+     *
+     * @return boolean
+     */
+    private function isGroupMatched(array $matchedGroupUse, $class)
+    {
+        foreach ($matchedGroupUse as $groupMatch) {
+            $groupMatch = preg_split("/,/", $groupMatch, PREG_SPLIT_NO_EMPTY);
+            if (in_array($class, $groupMatch)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
