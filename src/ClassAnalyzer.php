@@ -92,7 +92,7 @@ class ClassAnalyzer
         if (array_key_exists($name, $this->config)) {
             $type = gettype($this->config[$name]);
             if ($type === "array") {
-                $value              = is_array($value) ? $value : [$value];
+                $value = is_array($value) ? $value : [$value];
                 $this->config[$name] = array_merge($this->config[$name], $value);
             } else {
                 $this->config[$name] = $value;
