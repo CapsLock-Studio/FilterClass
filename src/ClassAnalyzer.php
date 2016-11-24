@@ -21,11 +21,11 @@ class ClassAnalyzer
     private $used           = [];
     private $lines          = [];
     private $collectedClass = [];
-    private $magic          = [
+    private $total          = 0;
+    private $config         = [
         "toPath"   => [],
         "fromPath" => "",
         "basePath" => "",
-        "total"    => 0,
     ];
 
     /**
@@ -78,23 +78,23 @@ class ClassAnalyzer
      */
     public function __get($name)
     {
-        return array_key_exists($name, $this->magic) ? $this->magic[$name] : false;
+        return array_key_exists($name, $this->config) ? $this->config[$name] : false;
     }
 
     /**
-     * magic function ref: $this->magic
+     * magic function ref: $this->config
      * @param string $name  key
      * @param mixed  $value value
      */
     public function __set($name, $value)
     {
-        if (array_key_exists($name, $this->magic)) {
-            $type = gettype($this->magic[$name]);
+        if (array_key_exists($name, $this->config)) {
+            $type = gettype($this->config[$name]);
             if ($type === "array") {
                 $value              = is_array($value) ? $value : [$value];
-                $this->magic[$name] = array_merge($this->magic[$name], $value);
+                $this->config[$name] = array_merge($this->config[$name], $value);
             } else {
-                $this->magic[$name] = $value;
+                $this->config[$name] = $value;
             }
         }
     }
