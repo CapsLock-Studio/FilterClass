@@ -54,9 +54,9 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $filter = new ClassAnalyzer([
             "fromPath" => __DIR__,
             "toPath"   => __DIR__,
+            "basePath" => __DIR__,
         ]);
 
-        $filter->basePath = __DIR__;
         $this->assertEquals($filter->basePath, __DIR__);
         $this->assertEquals($filter->fromPath, __DIR__);
         $this->assertEquals($filter->toPath, [__DIR__]);

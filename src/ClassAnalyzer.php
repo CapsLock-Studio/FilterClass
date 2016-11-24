@@ -34,10 +34,11 @@ class ClassAnalyzer
      */
     public function __construct(array $config = [])
     {
-        $templateConfig = ["fromPath" => "", "toPath" => ""];
+        $templateConfig = ["fromPath" => "", "toPath" => "", "basePath" => ""];
         $config         = array_merge($templateConfig, $config);
         $this->fromPath = $config["fromPath"];
         $this->toPath   = $config["toPath"];
+        $this->basePath = $config["basePath"];
 
         if (!is_dir($this->fromPath)) {
             throw new Exception("Defined `fromPath` is not valid");
