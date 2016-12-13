@@ -54,9 +54,9 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $filter = new ClassAnalyzer([
             "fromPath" => __DIR__,
             "toPath"   => __DIR__,
+            "basePath" => __DIR__,
         ]);
 
-        $filter->basePath = __DIR__;
         $this->assertEquals($filter->basePath, __DIR__);
         $this->assertEquals($filter->fromPath, __DIR__);
         $this->assertEquals($filter->toPath, [__DIR__]);
@@ -91,6 +91,7 @@ class ClassAnalyzerTest extends \Codeception\Test\Unit
         $this->assertEquals($lines["Foo\PHP7\Bar1"]["testIsUsed"], 2);
         $this->assertFalse(in_array("testIsUsed", $unused["Foo\PHP7\Bar"]));
         $this->assertEquals($lines["Foo\PHP7\Bar"]["testIsUsed"], 2);
-        $this->assertEquals($total, 49);
+        $this->assertEquals($total, 55);
+        $this->assertFalse(in_array("testFullCallFunction", $unused["Foo\Bar"]));
     }
 }

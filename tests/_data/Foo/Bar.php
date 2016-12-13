@@ -43,6 +43,11 @@ class Bar
 
     public function testOneLineFunction()
     {
-      
+
+    }
+
+    public function testFullCallFunction()
+    {
+
     }
 }
