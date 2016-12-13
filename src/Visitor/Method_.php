@@ -24,6 +24,7 @@ class Method_ extends Visitor
                     $expr      = array_pop($exprAry);
                     $namespace = implode("\\", $exprAry);
                     $this->objectMap[$var->name] = $expr;
+                    $this->use[$expr]            = $namespace;
                 }
             }
         }

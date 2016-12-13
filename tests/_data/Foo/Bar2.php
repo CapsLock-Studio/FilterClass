@@ -15,4 +15,10 @@ class Bar2
     {
         Foo\Bar::testStaicUsed();
     }
+
+    public function testFullCall()
+    {
+        $bar = new \Foo\Bar();
+        $bar->testFullCallFunction();
+    }
 }
