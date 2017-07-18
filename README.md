@@ -11,7 +11,7 @@ FilterClass
 
 Author: michael34435@capslock.tw
 
-This package will help you to analyze two folders and find out function you do not use(DoD).
+This package will help you to analyze two folders and find out function you do not use(legacy code).
 
 You have to assign two folders.  
 The first folder we called `folderA` that it is your based folder.  
